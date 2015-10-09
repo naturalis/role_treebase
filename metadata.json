@@ -1,0 +1,14 @@
+{
+  "name": "naturalis-role_treebase",
+  "version": "0.1.0",
+  "author": "naturalis",
+  "summary": "Puppet wrapper class for TreeBase",
+  "license": "Apache 2.0",
+  "source": "github.com/naturalis/role_treebase",
+  "project_page": "https://github.com/naturalis/role_treebase",
+  "issues_url": "https://github.com/naturalis/role_treebase/issues",
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
+  ]
+}
+
