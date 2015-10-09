@@ -35,7 +35,28 @@
 #
 # Copyright 2015 Your name here, unless otherwise noted.
 #
-class role_treebase {
-
-
+class role_treebase (
+  $console_listen_ip   = '127.0.0.1',
+  $wildfly_debug       = false,
+  $wildfly_xmx         = '1024m',
+  $wildfly_xms         = '256m',
+  $wildlfy_maxpermsize = '512m',
+  $install_java        = true
+){
+  class { 'wildfly':
+    admin_password          => 'treebase',
+    admin_user              => 'treebase',
+    deployment_dir          => '/opt/wildfly_deployments',
+    install_java            => $install_java,
+    bind_address_management => $console_listen_ip,
+  # require                 => Package['curl'],
+    debug_mode              => $wildfly_debug,
+    xmx                     => $wildfly_xmx,
+    xms                     => $wildfly_xms,
+    maxpermsize             => $wildlfy_maxpermsize,
+  }
+  file {'/opt/wildfly_deployments':
+    ensure => directory,
+    mode   => '0777',
+  }
 }
