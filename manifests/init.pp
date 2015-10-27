@@ -42,9 +42,11 @@ class role_treebase (
   $wildfly_xms         = '256m',
   $wildlfy_maxpermsize = '512m',
   $install_java        = true,
-  $postgresql_dbname   = "treebase_db",
+  $postgresql_dbname   = "treebase",
   $postgresql_username,
   $postgresql_password,
+  $treebase_owner     = "treebase_owner",
+  $treebase_read      = "treebase_read",
 ){
   class { 'wildfly':
     admin_password          => 'treebase',
@@ -68,5 +70,13 @@ class role_treebase (
     user     => "${postgresql_username}",
     password => postgresql_password("${postgresql_username}", "${postgresql_password}"),
     require => Class['postgresql::server'],
+  }
+  postgresql::server::role { "${treebase_owner}":
+    createrole    => false,
+    login         => false,
+  }
+  postgresql::server::role { "${treebase_read}":
+    createrole    => false,
+    login         => true,
   }
 }
