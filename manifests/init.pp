@@ -67,6 +67,6 @@ class role_treebase (
   postgresql::server::db { "${postgresql_dbname}":
     user     => "${postgresql_username}",
     password => postgresql_password("${postgresql_username}", "${postgresql_password}"),
+    require => Class['postgresql::server'],
   }
-  
 }
