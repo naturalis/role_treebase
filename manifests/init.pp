@@ -41,7 +41,10 @@ class role_treebase (
   $wildfly_xmx         = '1024m',
   $wildfly_xms         = '256m',
   $wildlfy_maxpermsize = '512m',
-  $install_java        = true
+  $install_java        = true,
+  $postgresql_dbname   = "treebase_db",
+  $postgresql_username,
+  $postgresql_password,
 ){
   class { 'wildfly':
     admin_password          => 'treebase',
@@ -49,7 +52,6 @@ class role_treebase (
     deployment_dir          => '/opt/wildfly_deployments',
     install_java            => $install_java,
     bind_address_management => $console_listen_ip,
-  # require                 => Package['curl'],
     debug_mode              => $wildfly_debug,
     xmx                     => $wildfly_xmx,
     xms                     => $wildfly_xms,
@@ -59,4 +61,12 @@ class role_treebase (
     ensure => directory,
     mode   => '0777',
   }
+
+  class { 'postgresql::server': }
+
+  postgresql::server::db { "${postgresql_dbname}":
+    user     => "${postgresql_username}",
+    password => postgresql_password("${postgresql_username}", "${postgresql_password}"),
+  }
+  
 }
