@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- An example of META-INF/context.xml - a Tomcat-specific shorthand to specify JNDI resources during development.
+     See http://tomcat.apache.org/tomcat-5.5-doc/jndi-datasource-examples-howto.html
+ -->
+
+<!-- Copy this file (context.xml.example) to context.xml and replace YOUR-XXX strings with suitable credentials.
+     (Note that context.xml is set to be ignored by SVN, so storing passwords there is safe.)
+     Make sure that $CATALINA_HOME/common/lib contains a postgres JDBC driver jar.
+     Now, dropping treebase-web.war to $CATALINA_HOME/webapps of a vanilla Tomcat should automatically create
+     config file $CATALINA_HOME/conf/Catalina/localhost/treebase-web.xml,
+     which instructs Tomcat to provide a JNDI DataSource.
+     FYI: If this config is created or modified by hand, it is not affected by WAR (re-)deployments.
+          (I.e., server-side configuration supercedes WAR-side.)
+-->
+<Context reloadable="true">
+
+  <Resource name="jdbc/TreebaseDB" auth="Container"
+            type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://localhost/<%= @postgresql_dbname %> "
+            username="<%= @postgresql_username %>" password="<%= @postgresql_password %>"
+			maxActive="20" maxIdle="10" maxWait="-1"
+            />
+
+    <Environment name="tb2/MesquiteFolder" value="/var/lib/tomcat6/mesquite"
+             type="java.lang.String" override="false"
+	     description="Absolute path to the directory where headless Mesquite is unpacked on the host system."/>
+
+	<Environment name="tb2/SiteUrl" value="http://treebase.org/treebase-web/"
+		type="java.lang.String" override="false"
+		description="The base URL from which this Treebase instance is served."/>
+
+	<Environment name="tb2/PurlBase" value="http://purl.org/phylo/treebase/phylows/"
+		type="java.lang.String" override="false"
+		description="The base URL of a PURL service that redirects to this Treebase instance."/>
+
+  	<Environment name="tb2/SmtpHost" value="smtp.nescent.org"
+         type="java.lang.String" override="false"
+	description="Host name of an SMTP server that your instance can use without authentication."/>
+
+	<Environment name="tb2/EmailAddress" value="sysadmin@nescent.org"
+         type="java.lang.String" override="true"
+	description="admin email address"/>
+
+</Context>

@@ -37,12 +37,15 @@ class role_treebase (
   $treebase_read      = "treebase_read",
 ) {
 
+  # Install tomcat 6
   package { 'tomcat6':
     ensure => installed,
   }
 
+  # Install database
   class { 'postgresql::server': }
 
+  # Create postgresql database and users
   postgresql::server::db { "${postgresql_dbname}":
     user     => "${postgresql_username}",
     password => postgresql_password("${postgresql_username}", "${postgresql_password}"),
@@ -55,5 +58,13 @@ class role_treebase (
   postgresql::server::role { "${treebase_read}":
     createrole    => false,
     login         => true,
+  }
+  # Deploy context.xml.default with our database settings
+  file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
+    ensure  => file,
+    onwer   => 'tomcat6'
+    group   => 'tomcat6'
+    mode    => '644'
+    content => template('context.xml.default.erb')
   }
 }
