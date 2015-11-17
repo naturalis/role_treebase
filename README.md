@@ -52,14 +52,16 @@ To install Treebase with Puppet:
 * 5. Restart tomcat6.
 
 ## Usage
-class { 'role_treebase' :
-  $postgresql_dbname    => "treebase",
-  $postgresql_username  => "treebase_app",
-  $postgresql_password  => "changeme",
-  $treebase_owner       => "treebase_owner",
-  $treebase_read        => "treebase_read",
-  $treebase_url         => "10.42.1.222/treebase-web",
-}
+```
+   class { 'role_treebase' :
+      $postgresql_dbname    => "treebase",
+      $postgresql_username  => "treebase_app",
+      $postgresql_password  => "changeme",
+      $treebase_owner       => "treebase_owner",
+      $treebase_read        => "treebase_read",
+      $treebase_url         => "10.42.1.222/treebase-web",
+   }
+```
 
 ## Reference
 role_treebase is the only class in this module. Depends on the following modules:
