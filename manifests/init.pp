@@ -35,7 +35,7 @@ class role_treebase (
   $postgresql_password  = undef,
   $treebase_owner       = "treebase_owner",
   $treebase_read        = "treebase_read",
-  $treebase_url         = "http://10.42.1.222/treeebase-web",
+  $treebase_url         = "10.42.1.222/treebase-web",
 ) {
 
   # Install tomcat 6
@@ -68,7 +68,7 @@ class role_treebase (
     mode    => '644',
     content => template('role_treebase/context.xml.default.erb'),
   }
-  # Deploy redirect index.html 
+  # Deploy redirect index.html
   file { '/var/lib/tomcat6/webapps/ROOT/index.html':
     ensure  => file,
     owner   => 'root',
