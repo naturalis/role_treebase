@@ -1,62 +1,80 @@
 # == Class: role_treebase
 #
-# Full description of class role_treebase here.
+# This role creates the necessary configuration for the Treebase webservice.
 #
 # === Parameters
-#
-# Document parameters here.
-#
-# [*sample_parameter*]
-#   Explanation of what this parameter affects and what it defaults to.
-#   e.g. "Specify one or more upstream ntp servers as an array."
-#
-# === Variables
-#
-# Here you should define a list of variables that this module would require.
-#
-# [*sample_variable*]
-#   Explanation of how this variable affects the funtion of this class and if
-#   it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#   External Node Classifier as a comma separated list of hostnames." (Note,
-#   global variables should be avoided in favor of class parameters as
-#   of Puppet 2.6.)
+# postgresql_dbname
+# postgresql_username
+# postgresql_password
+# treebase_owner
+# treebase_read
 #
 # === Examples
 #
 #  class { 'role_treebase':
-#    servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
+#   postgresql_dbname   => "treebase",
+#   postgresql_username => "treebase_app",
+#   postgresql_password => "changeme",
+#   treebase_owner      => "treebase_owner",
+#   treebase_read       => "treebase_read",
 #  }
 #
 # === Authors
 #
-# Author Name <author@domain.com>
+# Authors: Foppe Pieters <foppe.pieters@naturalis.nl>
+#          Pim Polderman <info@pimpolderman.nl>
 #
 # === Copyright
 #
-# Copyright 2015 Your name here, unless otherwise noted.
+# Copyright 2015 Naturalis
 #
+# FIXME: describe the parameters
+# TODO: Add vcsrepo for deployment
 class role_treebase (
-  $console_listen_ip   = '127.0.0.1',
-  $wildfly_debug       = false,
-  $wildfly_xmx         = '1024m',
-  $wildfly_xms         = '256m',
-  $wildlfy_maxpermsize = '512m',
-  $install_java        = true
-){
-  class { 'wildfly':
-    admin_password          => 'treebase',
-    admin_user              => 'treebase',
-    deployment_dir          => '/opt/wildfly_deployments',
-    install_java            => $install_java,
-    bind_address_management => $console_listen_ip,
-  # require                 => Package['curl'],
-    debug_mode              => $wildfly_debug,
-    xmx                     => $wildfly_xmx,
-    xms                     => $wildfly_xms,
-    maxpermsize             => $wildlfy_maxpermsize,
+  $postgresql_dbname    = "treebase",
+  $postgresql_username  = undef,
+  $postgresql_password  = undef,
+  $treebase_owner       = "treebase_owner",
+  $treebase_read        = "treebase_read",
+  $treebase_url         = "10.42.1.222/treebase-web",
+) {
+
+  # Install tomcat 6
+  package { 'tomcat6':
+    ensure => installed,
   }
-  file {'/opt/wildfly_deployments':
-    ensure => directory,
-    mode   => '0777',
+
+  # Install database
+  class { 'postgresql::server': }
+
+  # Create postgresql database and users
+  postgresql::server::db { "${postgresql_dbname}":
+    user     => "${postgresql_username}",
+    password => postgresql_password("${postgresql_username}", "${postgresql_password}"),
+    require => Class['postgresql::server'],
+  }
+  postgresql::server::role { "${treebase_owner}":
+    createrole    => false,
+    login         => false,
+  }
+  postgresql::server::role { "${treebase_read}":
+    createrole    => false,
+    login         => true,
+  }
+  # Deploy context.xml.default with our database settings
+  file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
+    ensure  => file,
+    owner   => 'tomcat6',
+    group   => 'tomcat6',
+    mode    => '644',
+    content => template('role_treebase/context.xml.default.erb'),
+  }
+  # Deploy redirect index.html
+  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '644',
+    content => template('role_treebase/index.html.erb')
   }
 }
