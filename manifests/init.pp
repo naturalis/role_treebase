@@ -65,6 +65,6 @@ class role_treebase (
     onwer   => 'tomcat6'
     group   => 'tomcat6'
     mode    => '644'
-    content => template('context.xml.default.erb')
+    content => template('role_treebase/context.xml.default.erb')
   }
 }
