@@ -62,7 +62,7 @@ class role_treebase (
   # Deploy context.xml.default with our database settings
   file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
     ensure  => file,
-    onwer   => 'tomcat6',
+    owner   => 'tomcat6',
     group   => 'tomcat6',
     mode    => '644',
     content => template('role_treebase/context.xml.default.erb'),
