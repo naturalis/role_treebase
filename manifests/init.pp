@@ -30,11 +30,12 @@
 # Copyright 2015 Naturalis
 #
 class role_treebase (
-  $postgresql_dbname   = "treebase",
-  $postgresql_username = undef,
-  $postgresql_password = undef,
-  $treebase_owner     = "treebase_owner",
-  $treebase_read      = "treebase_read",
+  $postgresql_dbname    = "treebase",
+  $postgresql_username  = undef,
+  $postgresql_password  = undef,
+  $treebase_owner       = "treebase_owner",
+  $treebase_read        = "treebase_read",
+  $treebase_url         = "http://10.42.1.222/treeebase-web",
 ) {
 
   # Install tomcat 6
@@ -66,5 +67,13 @@ class role_treebase (
     group   => 'tomcat6',
     mode    => '644',
     content => template('role_treebase/context.xml.default.erb'),
+  }
+  # Deploy redirect index.html 
+  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '644',
+    content => template('role_treebase/index.html.erb')
   }
 }
