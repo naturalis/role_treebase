@@ -15,65 +15,55 @@
 
 ## Overview
 
-A one-maybe-two sentence summary of what the module does/what problem it solves.
-This is your 30 second elevator pitch for your module. Consider including
-OS/Puppet version it works with.
+This puppet module creates the necessary configuration to deploy the Treebase java application.
 
 ## Module Description
 
-If applicable, this section should have a brief description of the technology
-the module integrates with and what that integration enables. This section
-should answer the questions: "What does this module *do*?" and "Why would I use
-it?"
-
-If your module has a range of functionality (installation, configuration,
-management, etc.) this is the time to mention it.
+The role::treebase class will bootstrap a Treebase ready environment.
 
 ## Setup
 
 ### What role_treebase affects
 
-* A list of files, packages, services, or operations that the module will alter,
-  impact, or execute on the system it's installed on.
-* This is a great place to stick any warnings.
-* Can be in list or paragraph form.
+* Package: tomcat6  (WARNING: End of Life Q4 2016) :-(
+* Directory: /var/lib/tomcat6 will be overwritten with Treebase specific settings.
+* Database: postgresql database with 3 users (owner, read and app)
 
-### Setup Requirements **OPTIONAL**
+### Setup Requirements
 
-If your module requires anything extra before setting up (pluginsync enabled,
-etc.), mention it here.
+* Treebase.tar.gz of tomcat_tb folder.
+* Treebase.war (java artifact)
 
-### Beginning with role_treebase
-
-The very basic steps needed for a user to get the module up and running.
-
-If your most recent release breaks compatibility or requires particular steps
-for upgrading, you may wish to include an additional section here: Upgrading
-(For an example, see http://forge.puppetlabs.com/puppetlabs/firewall).
+### Installation
+To install Treebase with Puppet:
+1. Apply the role::treebase class to a server
+2. Manually copy the tomcat_tb/* to /var/lib/tomcat6/
+3. Change the password of the postgres user
+    * su - postgres
+    * psql
+    * ALTER USER postgres WITH ENCRYPTED PASSWORD 'changeme';  
+4. Import the postgres database
+  * pg_restore -h localhost -U postgres -W <postgress_dump> -d treebase_app -v -c
+5. Restart tomcat6.
 
 ## Usage
-
-Put the classes, types, and resources for customizing, configuring, and doing
-the fancy stuff with your module here.
+class { 'role_treebase' :
+  $postgresql_dbname    => "treebase",
+  $postgresql_username  => "treebase_app",
+  $postgresql_password  => "changeme",
+  $treebase_owner       => "treebase_owner",
+  $treebase_read        => "treebase_read",
+  $treebase_url         => "10.42.1.222/treebase-web",
+}
 
 ## Reference
-
-Here, list the classes, types, providers, facts, etc contained in your module.
-This section should include all of the under-the-hood workings of your module so
-people know what the module is touching on their system but don't need to mess
-with things. (We are working on automating this section!)
+role_treebase is the only class in this module. Depends on the following modules:
 
 ## Limitations
-
-This is where you list OS compatibility, version compatibility, etc.
+Only supported/tested OS: ubuntu LTS 14.04
 
 ## Development
+Feel free to submit pull requests.
 
-Since your module is awesome, other users will want to play with it. Let them
-know what the ground rules for contributing are.
-
-## Release Notes/Contributors/Etc **Optional**
-
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You may also add any additional sections you feel are
-necessary or important to include here. Please use the `## ` header.
+## TODO
+* Add vscrepo to auto deploy treebase-web and war artifact.

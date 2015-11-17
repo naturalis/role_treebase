@@ -3,7 +3,6 @@
 # This role creates the necessary configuration for the Treebase webservice.
 #
 # === Parameters
-# FIXME: describe the parameters
 # postgresql_dbname
 # postgresql_username
 # postgresql_password
@@ -29,6 +28,8 @@
 #
 # Copyright 2015 Naturalis
 #
+# FIXME: describe the parameters
+# TODO: Add vcsrepo for deployment
 class role_treebase (
   $postgresql_dbname    = "treebase",
   $postgresql_username  = undef,
