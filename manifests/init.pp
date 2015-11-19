@@ -12,11 +12,12 @@
 # === Examples
 #
 #  class { 'role_treebase':
-#   postgresql_dbname   => "treebase",
+#   postgresql_dbname   => "treebasedb",
 #   postgresql_username => "treebase_app",
 #   postgresql_password => "changeme",
 #   treebase_owner      => "treebase_owner",
 #   treebase_read       => "treebase_read",
+#   treebase_url        => "localhost",
 #  }
 #
 # === Authors
@@ -31,12 +32,12 @@
 # FIXME: describe the parameters
 # TODO: Add vcsrepo for deployment
 class role_treebase (
-  $postgresql_dbname    = "treebase",
-  $postgresql_username  = undef,
+  $postgresql_dbname    = "treebasedb",
+  $postgresql_username  = "treebase_app",
   $postgresql_password  = undef,
   $treebase_owner       = "treebase_owner",
   $treebase_read        = "treebase_read",
-  $treebase_url         = "10.42.1.222/treebase-web",
+  $treebase_url         = undef,
 ) {
 
   # Install tomcat 6

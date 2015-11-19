@@ -47,19 +47,19 @@ To install Treebase with Puppet:
 ```
 * 4. Import the postgres database
 ```
-   $ pg_restore -h localhost -U postgres -W <postgress_dump> -d treebase_app -v -c
+   $ pg_restore -h localhost -U postgres -W <postgress_dump> -d treebasedb -v -c
 ```
 * 5. Restart tomcat6.
 
 ## Usage
 ```
    class { 'role_treebase' :
-      $postgresql_dbname    => "treebase",
+      $postgresql_dbname    => "treebasedb",
       $postgresql_username  => "treebase_app",
       $postgresql_password  => "changeme",
       $treebase_owner       => "treebase_owner",
       $treebase_read        => "treebase_read",
-      $treebase_url         => "10.42.1.222/treebase-web",
+      $treebase_url         => "localhost",
    }
 ```
 
