@@ -70,7 +70,7 @@ class role_treebase (
     content => template('role_treebase/context.xml.default.erb'),
   }
   # Deploy tomcat default to enable authbind
-  file { '/etc/default/tomcat6 ':
+  file { '/etc/default/tomcat6':
     ensure  => file,
     owner   => 'root',
     group   => 'root',
@@ -78,7 +78,7 @@ class role_treebase (
     content => template('role_treebase/tomcat6.erb'),
   }
   # Deploy tomcat server.xml to listen on port 80
-  file { '/var/lib/tomcat6/conf/server.xml ':
+  file { '/var/lib/tomcat6/conf/server.xml':
     ensure  => file,
     owner   => 'root',
     group   => 'tomcat6',
