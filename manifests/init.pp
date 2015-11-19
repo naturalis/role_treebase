@@ -45,8 +45,11 @@ class role_treebase (
   }
 
   # Install database
+  class { 'postgresql::globals':
+    manage_package_repo => true,
+    version             => '8.4',
+  }->
   class { 'postgresql::server': }
-
   # Create postgresql database and users
   postgresql::server::db { "${postgresql_dbname}":
     user     => "${postgresql_username}",
