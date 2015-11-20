@@ -38,6 +38,7 @@ class role_treebase (
   $treebase_owner       = "treebase_owner",
   $treebase_read        = "treebase_read",
   $treebase_url         = undef,
+  $purl_url             = "http://purl.org/phylo/treebase/phylows/"
 ) {
 
   # Install tomcat 6
