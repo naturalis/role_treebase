@@ -10,6 +10,8 @@ define role_treebase::repo (
   $repolocation     = '/opt/git',
   $reporevision     = 'master',
   $repoversion      = 'present',
+  $repoowner        = 'tomcat6',
+  $repogroup        = 'tomcat6',
   $reposource,
   $repokey,
 )
@@ -71,5 +73,7 @@ $repokeyname = $repouser
     source    => $reposource,
     user      => $repouser,
     revision  => $reporevision,
+    owner     => $repoowner,
+    group     => $repogroup,
   }
 }
