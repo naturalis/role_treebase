@@ -38,13 +38,18 @@ class role_treebase (
   $treebase_owner       = "treebase_owner",
   $treebase_read        = "treebase_read",
   $treebase_url         = undef,
+  $gitrepos             =
+  [ {'treebase' =>
+      {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
+       'repokey'      => 'PRIVATE KEY here',
+      },
+   },
+  ],
 ) {
-
   # Install tomcat 6
   package { 'tomcat6':
     ensure => installed,
   }
-
   # Install database
   class { 'postgresql::globals':
     manage_package_repo => true,
@@ -72,7 +77,7 @@ class role_treebase (
     group   => 'tomcat6',
     mode    => '644',
     content => template('role_treebase/context.xml.default.erb'),
-
+  }
   # Deploy tomcat default to enable authbind
   file { '/etc/default/tomcat6':
     ensure  => file,
@@ -96,5 +101,14 @@ class role_treebase (
     group   => 'root',
     mode    => '644',
     content => template('role_treebase/index.html.erb')
+  }
+  # General repo settings
+  class { 'role_treebase::repogeneral': }
+  # Check out repositories
+  create_resources('role_treebase::repo', $gitrepos)
+  # make symlink to treebase-web
+  file { '/var/lib/tomcat6/webapps/treebase-web:
+    ensure => 'link',
+    target => '/opt/git/treebase/treebase-web',
   }
 }
