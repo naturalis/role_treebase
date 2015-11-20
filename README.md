@@ -14,7 +14,7 @@
 
 ## Overview
 
-This puppet module creates the necessary configuration to deploy the Treebase java application.
+This puppet module deploys the Treebase java application (excluding the databse) and creates the necessary configuration to run the application.
 
 ## Module Description
 
@@ -30,29 +30,24 @@ The role::treebase class will bootstrap a Treebase ready environment.
 
 ### Setup Requirements
 
-* Treebase.tar.gz of tomcat_tb folder.
-* Treebase.war (java artifact)
+* Database dump
 
 ### Installation
 
 To install Treebase with Puppet:
 
 * 1. Apply the role::treebase class to a server
-* 2. Manually copy the tomcat_tb/* to /var/lib/tomcat6/
-* 3. Set the user and group rights to tomcat6
-```
-   $ sudo chown -R tomcat6:root /var/lib/tomcat6/* && chown -R tomcat6:tomcat6 /var/lib/tomcat6/webapps/*
-```
-* 4. Change the password of the postgres user
+* 2. Manually copy the database dump to the server
+* 3. Change the password of the postgres user
 ```
    $ sudo -u postgres psql
    $ ALTER USER postgres WITH ENCRYPTED PASSWORD 'changeme';  
 ```
-* 5. Import the postgres database
+* 4. Import the postgres database
 ```
    $ pg_restore -h localhost -U postgres -W <postgress_dump> -d treebasedb -v -c
 ```
-* 6. Restart tomcat6.
+* 5. Restart tomcat6.
 ```
    $ sudo service tomcat6 restart
 ```
@@ -66,11 +61,15 @@ To install Treebase with Puppet:
       $treebase_owner       => "treebase_owner",
       $treebase_read        => "treebase_read",
       $treebase_url         => "localhost",
+      $purl_url             => "http://purl.org/phylo/treebase/phylows/",
+      $gitrepos             => undef,
    }
 ```
 
 ## Reference
 role_treebase is the only class in this module. Depends on the following modules:
+  - vcsrepo (puppetlabs)
+  - postgresql (puppetlabs)
 
 ## Limitations
 Only supported/tested OS: ubuntu LTS 14.04
@@ -79,4 +78,4 @@ Only supported/tested OS: ubuntu LTS 14.04
 Feel free to submit pull requests.
 
 ## TODO
-* Add vscrepo to auto deploy treebase-web and war artifact.
+* Add database dump download and import
