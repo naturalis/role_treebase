@@ -115,11 +115,11 @@ class role_treebase (
   # make symlink to mesquite
   file { '/var/lib/tomcat6/mesquite':
     ensure => 'link',
-    target => '/opt/git/treebase/mesquite,
+    target => '/opt/git/treebase/mesquite',
   }
   # make symlink to treebase-web.war
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure => 'link',
-    target => '/opt/git/treebase/treebase-web.war,
+    target => '/opt/git/treebase/treebase-web.war',
   }
 }
