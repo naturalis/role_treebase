@@ -108,17 +108,17 @@ class role_treebase (
   # Check out repositories
   create_resources('role_treebase::repo', $gitrepos)
   # make symlink to treebase-web
-  file { '/var/lib/tomcat6/webapps/treebase-web:
+  file { '/var/lib/tomcat6/webapps/treebase-web':
     ensure => 'link',
     target => '/opt/git/treebase/treebase-web',
   }
   # make symlink to mesquite
-  file { '/var/lib/tomcat6/mesquite:
+  file { '/var/lib/tomcat6/mesquite':
     ensure => 'link',
     target => '/opt/git/treebase/mesquite,
   }
   # make symlink to treebase-web.war
-  file { '/var/lib/tomcat6/webapps/treebase-web.war:
+  file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure => 'link',
     target => '/opt/git/treebase/treebase-web.war,
   }
