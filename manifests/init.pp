@@ -38,6 +38,7 @@ class role_treebase (
   $treebase_owner       = "treebase_owner",
   $treebase_read        = "treebase_read",
   $treebase_url         = undef,
+  $purl_url             = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos             =
   [ {'treebase' =>
       {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
@@ -70,7 +71,7 @@ class role_treebase (
     createrole    => false,
     login         => true,
   }
-  # Deploy context.xml.default with our database settings.
+  # Deploy context.xml.default with our database settings
   file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
     ensure  => file,
     owner   => 'tomcat6',
@@ -110,5 +111,15 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web:
     ensure => 'link',
     target => '/opt/git/treebase/treebase-web',
+  }
+  # make symlink to mesquite
+  file { '/var/lib/tomcat6/mesquite:
+    ensure => 'link',
+    target => '/opt/git/treebase/mesquite,
+  }
+  # make symlink to treebase-web.war
+  file { '/var/lib/tomcat6/webapps/treebase-web.war:
+    ensure => 'link',
+    target => '/opt/git/treebase/treebase-web.war,
   }
 }
