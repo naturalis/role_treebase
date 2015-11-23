@@ -54,28 +54,34 @@ To install Treebase with Puppet:
 
 ## Usage
 ```
-   class { 'role_treebase' :
-      $postgresql_dbname    => "treebasedb",
-      $postgresql_username  => "treebase_app",
-      $postgresql_password  => "changeme",
-      $treebase_owner       => "treebase_owner",
-      $treebase_read        => "treebase_read",
-      $treebase_url         => "localhost",
-      $purl_url             => "http://purl.org/phylo/treebase/phylows/",
-      $gitrepos             => undef,
-   }
+ class { 'role_treebase' :
+  postgresql_dbname    => "treebasedb",
+  postgresql_username  => "treebase_app",
+  postgresql_password  => "change_me",
+  treebase_owner       => "treebase_owner",
+  treebase_read        => "treebase_read",
+  treebase_url         => "treebase.org/treebase-web",
+  treebase_smtp        => "smtp.example.com",
+  treebase_adminmail   => "sysadmin@example.com",
+  java_options         => "-Djava.awt.headless=true -Xms2048m -Xmx16384M",
+  purl_url             => "http://purl.org/phylo/treebase/phylows/",
+  gitrepos             =>
+  [ {'tomcat6' =>
+      {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
+       'repokey'      => 'PRIVATE KEY here',
+      },
+   },
+  ],
+}
 ```
 
 ## Reference
 role_treebase is the only class in this module. Depends on the following modules:
-  - vcsrepo (puppetlabs)
-  - postgresql (puppetlabs)
+  - puppetlabs/vcsrepo
+  - puppetlabs/postgresql
 
 ## Limitations
 Only supported/tested OS: ubuntu LTS 14.04
 
 ## Development
 Feel free to submit pull requests.
-
-## TODO
-* install log4j.

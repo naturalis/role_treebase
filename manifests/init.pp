@@ -92,7 +92,6 @@ class role_treebase (
   $treebase_url         = undef,
   $treebase_smtp        = "smtp.nescent.org",
   $treebase_adminmail   = "sysadmin@nescent.org",
-  $userdir              = "/usr/share/",
   $java_options         = "-Djava.awt.headless=true -Xms1024m -Xmx2048M -XX:+UseConcMarkSweepGC",
   $purl_url             = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos             =
