@@ -22,7 +22,7 @@ $repokeyname = $repouser
   user { $repouser :
     ensure      => present,
     groups      => 'git',
-    home        => "/home/${repouser}",
+    home        => "/usr/share/${repouser}",
     require     => Class['role_treebase::repogeneral']
   }
 # create homedirectory
