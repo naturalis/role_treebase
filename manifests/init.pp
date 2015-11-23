@@ -186,6 +186,18 @@ class role_treebase (
     mode   => '644',
     source => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
   }
+  # deploy log4j properties
+  file {'/var/lib/tomcat6/conf/log4j.properties':
+    ensure => file,
+    owner  => 'tomcat6',
+    group  => 'tomcat6',
+    mode   => '644',
+    source => "puppet:///modules/role_treebase/log4j.properties",
+  }
+  # remove old logging properties
+  file {'/var/lib/tomcat6/conf/logging.properties':
+    ensure => absent,
+  }
   # make sure that the tomcat 6 services is running
   service { 'tomcat6':
     ensure => running,
