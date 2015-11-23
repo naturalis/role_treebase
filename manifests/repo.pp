@@ -22,47 +22,47 @@ $repokeyname = $repouser
   user { $repouser :
     ensure      => present,
     groups      => 'git',
-    home        => "/usr/share/${repouser}",
+    home        => "${userdir}/${repouser}",
     require     => Class['role_treebase::repogeneral']
   }
 # create homedirectory
-  file { "/usr/share/${repouser}":
+  file { "/${userdir}/${repouser}":
     ensure      => 'directory',
     owner       => $repouser,
     mode        => '0770',
     require     => User[$repouser]
   }
 # Create .ssh directory
-  file { "/usr/share/${repouser}/.ssh":
+  file { "${userdir}/${repouser}/.ssh":
     ensure    => directory,
     owner     => $repouser,
   }->
 # Create .ssh/repokey file
-  file { "/usr/share/${repouser}/.ssh/${repouser}":
+  file { "${userdir}/${repouser}/.ssh/${repouser}":
     ensure    => present,
     content   => $repokey,
     owner     => $repouser,
     mode      => '0600',
   }->
 # Create sshconfig file
-  file { "/usr/share/${repouser}/.ssh/config":
+  file { "${userdir}/${repouser}/.ssh/config":
     ensure    => present,
-    content   =>  template('role_treebase/sshconfig.erb'),
+    content   => template('role_treebase/sshconfig.erb'),
     owner     => $repouser,
     mode      => '0600',
   }->
 # run known_hosts.sh for future acceptance of github key
   exec{ 'add_known_hosts' :
     command   => '/usr/local/sbin/known_hosts.sh',
-    cwd       => "/usr/share/${repouser}/.ssh/",
+    cwd       => "${userdir}/${repouser}/.ssh/",
     path      => '/sbin:/usr/bin:/usr/local/bin/:/bin/',
     provider  => shell,
     user      => $repouser,
-    unless    => "test -f /usr/share/${repouser}/.ssh/known_hosts",
+    unless    => "test -f ${userdir}/${repouser}/.ssh/known_hosts",
     require   => Class['role_treebase::repogeneral']
   }->
 # give known_hosts file the correct permissions
-  file{ "/usr/share/${repouser}/.ssh/known_hosts":
+  file{ "${userdir}/${repouser}/.ssh/known_hosts":
     mode      => '0600',
     owner     => $repouser
   }->
