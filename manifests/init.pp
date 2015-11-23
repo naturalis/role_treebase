@@ -40,7 +40,7 @@ class role_treebase (
   $treebase_adminmail   = "sysadmin@nescent.org",
   $purl_url             = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos             =
-  [ {'treebase' =>
+  [ {'tomcat6' =>
       {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
        'repokey'      => 'PRIVATE KEY here',
       },
