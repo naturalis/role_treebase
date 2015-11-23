@@ -28,6 +28,10 @@
 #
 # Set the redirect here. If we connect to port 80 we get automatically forwarded to port 8080. default: treebase.org/treebase-web
 #
+# java_options
+#
+# set the java (memory) runtime options for tomcat 6, default "-Djava.awt.headless=true -Xms2048m -Xmx16384M"
+#
 # treebase_smtp
 #
 # Sent users their forgot password e-mails and notifications. default: smtp.nescent.org
@@ -52,16 +56,17 @@
 #
 # === Examples
 # class { 'role_treebase' :
-#  $postgresql_dbname    => "treebasedb",
-#  $postgresql_username  => "treebase_app",
-#  $postgresql_password  => "changeme",
-#  $treebase_owner       => "treebase_owner",
-#  $treebase_read        => "treebase_read",
-#  $treebase_url         => "treebase.org/treebase-web",
-#  $treebase_smtp        => "smtp.nescent.org",
-#  $treebase_adminmail   => "sysadmin@nescent.org",
-#  $purl_url             => "http://purl.org/phylo/treebase/phylows/",
-#  $gitrepos             =>
+#  postgresql_dbname    => "treebasedb",
+#  postgresql_username  => "treebase_app",
+#  postgresql_password  => "changeme",
+#  treebase_owner       => "treebase_owner",
+#  treebase_read        => "treebase_read",
+#  treebase_url         => "treebase.org/treebase-web",
+#  treebase_smtp        => "smtp.nescent.org",
+#  treebase_adminmail   => "sysadmin@nescent.org",
+#  java_options         => "-Djava.awt.headless=true -Xms2048m -Xmx16384M",
+#  purl_url             => "http://purl.org/phylo/treebase/phylows/",
+#  gitrepos             =>
 #  [ {'tomcat6' =>
 #      {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
 #       'repokey'      => 'PRIVATE KEY here',
@@ -87,6 +92,7 @@ class role_treebase (
   $treebase_url         = undef,
   $treebase_smtp        = "smtp.nescent.org",
   $treebase_adminmail   = "sysadmin@nescent.org",
+  $java_options         = "-Djava.awt.headless=true -Xms1024m -Xmx2048M -XX:+UseConcMarkSweepGC",
   $purl_url             = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos             =
   [ {'tomcat6' =>
@@ -135,6 +141,7 @@ class role_treebase (
     group   => 'root',
     mode    => '644',
     content => template('role_treebase/tomcat6.erb'),
+    notify  => Service['tomcat6'],
   }
   # Deploy tomcat server.xml to listen on port 80
   file { '/var/lib/tomcat6/conf/server.xml':
@@ -170,5 +177,9 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure => 'link',
     target => '/opt/git/tomcat6/treebase-web.war',
+  }
+  service { 'tomcat6':
+    ensure => running,
+    enable => true,
   }
 }
