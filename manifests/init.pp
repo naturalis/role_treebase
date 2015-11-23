@@ -178,6 +178,15 @@ class role_treebase (
     ensure => 'link',
     target => '/opt/git/tomcat6/treebase-web.war',
   }
+  # deploy log4j
+  file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':
+    ensure => file,
+    owner  => 'tomcat6',
+    group  => 'root',
+    mode   => '644',
+    source => "puppet:///role_treebase/log4j-1.2.16.jar",
+  }
+  # make sure that the tomcat 6 services is running
   service { 'tomcat6':
     ensure => running,
     enable => true,
