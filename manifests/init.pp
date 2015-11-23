@@ -29,8 +29,6 @@
 #
 # Copyright 2015 Naturalis
 #
-# FIXME: describe the parameters
-# TODO: Add vcsrepo for deployment
 class role_treebase (
   $postgresql_dbname    = "treebasedb",
   $postgresql_username  = "treebase_app",
