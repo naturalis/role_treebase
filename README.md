@@ -78,4 +78,5 @@ Only supported/tested OS: ubuntu LTS 14.04
 Feel free to submit pull requests.
 
 ## TODO
-* Add database dump download and import
+* Add database dump download and import.
+* install log4j.

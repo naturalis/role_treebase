@@ -38,6 +38,8 @@ class role_treebase (
   $treebase_owner       = "treebase_owner",
   $treebase_read        = "treebase_read",
   $treebase_url         = undef,
+  $treebase_smtp        = "smtp.nescent.org",
+  $treebase_adminmail   = "sysadmin@nescent.org",
   $purl_url             = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos             =
   [ {'treebase' =>
