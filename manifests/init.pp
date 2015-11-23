@@ -184,7 +184,7 @@ class role_treebase (
     owner  => 'tomcat6',
     group  => 'root',
     mode   => '644',
-    source => "puppet:///role_treebase/log4j-1.2.16.jar",
+    source => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
   }
   # make sure that the tomcat 6 services is running
   service { 'tomcat6':
