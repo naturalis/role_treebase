@@ -3,23 +3,72 @@
 # This role creates the necessary configuration for the Treebase webservice.
 #
 # === Parameters
+#
 # postgresql_dbname
+#
+# The database name, default: treebasedb
+#
 # postgresql_username
+#
+# Postgresql username, default: treebase_app
+#
 # postgresql_password
+#
+# Postgressql password, undefined. Make sure you set a password here.
+#
 # treebase_owner
+#
+# Owner of the treebase database objects, default: treebase_owner
+#
 # treebase_read
 #
+# Read-only account. Can be used when need a extra tomcat instance read from the database. default: treebase_read
+#
+# treebase_url
+#
+# Set the redirect here. If we connect to port 80 we get automatically forwarded to port 8080. default: treebase.org/treebase-web
+#
+# treebase_smtp
+#
+# Sent users their forgot password e-mails and notifications. default: smtp.nescent.org
+#
+# treebase_adminmail
+#
+# Administrators e-mail address. default: sysadmin: sysadmin@nescent.org
+#
+# purl_url
+#
+# purl (persistent_url). Default: http://purl.org/phylo/treebase/phylows/
+#
+# gitrepos
+#
+# Hash example:
+# [ {'tomcat6' =>
+#    {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
+#     'repokey'      => 'PRIVATE KEY here',
+#    },
+# },
+# ]
+#
 # === Examples
-#
-#  class { 'role_treebase':
-#   postgresql_dbname   => "treebasedb",
-#   postgresql_username => "treebase_app",
-#   postgresql_password => "changeme",
-#   treebase_owner      => "treebase_owner",
-#   treebase_read       => "treebase_read",
-#   treebase_url        => "localhost",
-#  }
-#
+# class { 'role_treebase' :
+#  $postgresql_dbname    => "treebasedb",
+#  $postgresql_username  => "treebase_app",
+#  $postgresql_password  => "changeme",
+#  $treebase_owner       => "treebase_owner",
+#  $treebase_read        => "treebase_read",
+#  $treebase_url         => "treebase.org/treebase-web",
+#  $treebase_smtp        => "smtp.nescent.org",
+#  $treebase_adminmail   => "sysadmin@nescent.org",
+#  $purl_url             => "http://purl.org/phylo/treebase/phylows/",
+#  $gitrepos             =>
+#  [ {'tomcat6' =>
+#      {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
+#       'repokey'      => 'PRIVATE KEY here',
+#      },
+#   },
+#  ],
+#}
 # === Authors
 #
 # Authors: Foppe Pieters <foppe.pieters@naturalis.nl>
