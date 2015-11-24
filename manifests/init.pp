@@ -134,13 +134,22 @@ class role_treebase (
     mode    => '644',
     content => template('role_treebase/context.xml.default.erb'),
   }
+  # Deploy tomcat init script to support headless mesquite
+  file { '/etc/init.d/tomcat6':
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '755',
+    content => template('role_treebase/tomcat6-init.erb'),
+    notify  => Service['tomcat6'],
+  }
   # Deploy tomcat default to enable authbind
   file { '/etc/default/tomcat6':
     ensure  => file,
     owner   => 'root',
     group   => 'root',
     mode    => '644',
-    content => template('role_treebase/tomcat6.erb'),
+    content => template('role_treebase/tomcat6-etc.erb'),
     notify  => Service['tomcat6'],
   }
   # Deploy tomcat server.xml to listen on port 80
