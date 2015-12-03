@@ -110,7 +110,6 @@ class role_treebase (
                           'options'           => '-Indexes +FollowSymLinks +MultiViews',
                           'allow_override'    => 'All'}],
                           'rewrites'          => [{ 'rewrite_rule' => ['^/treebase-web(.*)$ http://localhost:8080/treebase-web$1 [P]'] }],
-                          'ProxyPassReverse'  => '/treebase-web/  http://localhost:8080/treebase-web/'
                           'port'              => 80,
                           'serveradmin'       => 'webmaster@naturalis.nl',
                           'priority'          => 10,
