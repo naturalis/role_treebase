@@ -179,6 +179,7 @@ class role_treebase (
   include apache::mod::rewrite
   include apache::mod::speling
   include apache::mod::proxy
+  include apache::mod::proxy_http  
   # Install mod-jk
   package { 'libapache2-mod-jk':
     ensure        => installed,
