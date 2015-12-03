@@ -191,10 +191,8 @@ class role_treebase (
     mode          => '644',
     content       => template('role_treebase/jk.conf.erb'),
   }
-  # Create instances (vhosts)
-  class { 'role_treebase::instances':
-      instances               => $instances,
-  }
+  # Create Apache Vitual host
+  create_resources('apache::vhost', $instances)
   # Deploy context.xml.default with our database settings
   file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
     ensure        => file,
