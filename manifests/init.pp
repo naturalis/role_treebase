@@ -103,6 +103,17 @@ class role_treebase (
   ],
   $webdirs              = ['/var/www/htdocs'],
   $rwwebdirs            = ['/var/www/htdocs/cache'],
+  $instances            = {'treebase.naturalis.nl' => {
+                          'serveraliases'   => '*.naturalis.nl',
+                          'docroot'         => '/var/www/htdocs',
+                          'directories'     => [{ 'path' => '/var/www/htdocs',
+                          'options' => '-Indexes +FollowSymLinks +MultiViews',
+                          'allow_override' => 'All'}],
+                          'port'            => 80,
+                          'serveradmin'     => 'webmaster@naturalis.nl',
+                          'priority'        => 10,
+                          },
+                        },
 ) {
   # Install tomcat 6
   package { 'tomcat6':
@@ -155,12 +166,7 @@ class role_treebase (
     max_input_time            => $max_input_time,
     session_gc_maxlifetime    => $session_gc_maxlifetime,
   }
-  file { '/etc/php5/mods-available/xdebug.ini':
-    ensure                    => present,
-    content                   => template('role_nbcdata/xdebug.ini.erb'),
-    require                   => [Package[$extra_packages]]
-  }
-  # Install apache and enable modules
+ # Install apache and enable modules
   class { 'apache':
     default_mods              => true,
     mpm_module                => 'prefork',
@@ -186,7 +192,7 @@ class role_treebase (
     content       => template('role_treebase/jk.conf.erb'),
   }
   # Create instances (vhosts)
-  class { 'role_nbcdata::instances':
+  class { 'role_treebase::instances':
       instances               => $instances,
   }
   # Deploy context.xml.default with our database settings
