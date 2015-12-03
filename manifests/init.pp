@@ -109,7 +109,7 @@ class role_treebase (
                           'directories'       => [{ 'path' => '/var/www/htdocs',
                           'options'           => '-Indexes +FollowSymLinks +MultiViews',
                           'allow_override'    => 'All'}],
-                          'custom_fragment'   => 'JkMount /treebase-web* worker1'
+                          'custom_fragment'   => 'JkMount /treebase-web* worker1',
                           'rewrites'          => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
                           'port'              => 80,
                           'serveradmin'       => 'webmaster@naturalis.nl',
