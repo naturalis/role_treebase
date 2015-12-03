@@ -110,6 +110,7 @@ class role_treebase (
                           'options'           => '-Indexes +FollowSymLinks +MultiViews',
                           'allow_override'    => 'All'}],
                           'rewrites'          => [{ 'rewrite_rule' => ['^/treebase-web(.*)$ http://localhost:8080/treebase-web$1 [P]'] }],
+                          'ProxyPassReverse'  => '/treebase-web/  http://localhost:8080/treebase-web/'
                           'port'              => 80,
                           'serveradmin'       => 'webmaster@naturalis.nl',
                           'priority'          => 10,
@@ -178,6 +179,7 @@ class role_treebase (
   include apache::mod::php
   include apache::mod::rewrite
   include apache::mod::speling
+  include apache::mod::proxy
   # Install mod-jk
   package { 'libapache2-mod-jk':
     ensure        => installed,
