@@ -109,7 +109,7 @@ class role_treebase (
                           'directories'       => [{ 'path' => '/var/www/htdocs',
                           'options'           => '-Indexes +FollowSymLinks +MultiViews',
                           'allow_override'    => 'All'}],
-                          'rewrites'          => 'rewrite_rule' => '^/treebase-web(.*)$ http://localhost:8080/treebase-web$1 [P]',
+                          'rewrites'          => [{ 'rewrite_rule' => ['^/treebase-web(.*)$ http://localhost:8080/treebase-web$1 [P]'] }],
                           'port'              => 80,
                           'serveradmin'       => 'webmaster@naturalis.nl',
                           'priority'          => 10,
