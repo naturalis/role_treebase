@@ -101,6 +101,8 @@ class role_treebase (
       },
    },
   ],
+  $webdirs              = ['/var/www/htdocs'],
+  $rwwebdirs            = ['/var/www/htdocs/cache'],
 ) {
   # Install tomcat 6
   package { 'tomcat6':
