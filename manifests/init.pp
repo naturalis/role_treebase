@@ -104,14 +104,21 @@ class role_treebase (
   $webdirs              = ['/var/www/htdocs'],
   $rwwebdirs            = ['/var/www/htdocs/cache'],
   $instances            = {'treebase.naturalis.nl' => {
-                          'serveraliases'   => '*.naturalis.nl',
-                          'docroot'         => '/var/www/htdocs',
-                          'directories'     => [{ 'path' => '/var/www/htdocs',
-                          'options' => '-Indexes +FollowSymLinks +MultiViews',
-                          'allow_override' => 'All'}],
-                          'port'            => 80,
-                          'serveradmin'     => 'webmaster@naturalis.nl',
-                          'priority'        => 10,
+                          'serveraliases'     => '*.naturalis.nl',
+                          'docroot'           => '/var/www/htdocs',
+                          'directories'       => [{ 'path' => '/var/www/htdocs',
+                          'options'           => '-Indexes +FollowSymLinks +MultiViews',
+                          'allow_override'    => 'All'}],
+                          'rewrites'          => [{ 'rewrite_rule' => '^/treebase-web(.*)$ http://localhost:8080/treebase-web$1 [P]',
+                          'ProxyPassReverse'  => '/treebase-web/ http://localhost:8080/treebase-web/',
+                          'ProxyPass'         => '/treebase-web/img/ http://localhost:8080/treebase-web/images/',
+                          'ProxyPassReverse'  => '/treebase-web/img/ http://localhost:8080/treebase-web/images/',
+                          'ProxyPass'         => '/treebase-web/search/img/ http://localhost:8080/treebase-web/images/',
+                          'ProxyPassReverse'  => '/treebase-web/search/img/ http://localhost:8080/treebase-web/images/',
+                          'ProxyTimeout'      => '86500'}],
+                          'port'              => 80,
+                          'serveradmin'       => 'webmaster@naturalis.nl',
+                          'priority'          => 10,
                           },
                         },
 ) {
@@ -137,7 +144,7 @@ class role_treebase (
   }
   postgresql::server::role { "${treebase_read}":
     createrole    => false,
-    login         => true,
+    login         => true,create_resources('apache::vhost', $instances)
   }
   #make webdirs
   file { $webdirs:
