@@ -180,16 +180,19 @@ class role_treebase (
   # Install mod-jk
   package { 'libapache2-mod-jk':
     ensure        => installed,
+    require       => Class['apache']
   }
   file { '/etc/libapache2-mod-jk/workers.properties':
     ensure        => file,
     mode          => '644',
     content       => template('role_treebase/workers.properties.erb'),
+    require       => Package['libapache2-mod-jk']
   }
   file { '/etc/apache2/mods-available/jk.conf':
     ensure        => file,
     mode          => '644',
     content       => template('role_treebase/jk.conf.erb'),
+    require       => Package['libapache2-mod-jk']
   }
   # Create Apache Vitual host
   create_resources('apache::vhost', $instances)
