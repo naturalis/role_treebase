@@ -109,13 +109,8 @@ class role_treebase (
                           'directories'       => [{ 'path' => '/var/www/htdocs',
                           'options'           => '-Indexes +FollowSymLinks +MultiViews',
                           'allow_override'    => 'All'}],
+                          'custom_fragment'   => 'JkMount /treebase-web* worker1'
                           'rewrites'          => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
-                          'proxy_pass'        => [{'path' => '/treebase-web/img/ http://testnat.treebase.org:8080/treebase-web/images/',
-                          'reverse_urls' => ['/treebase-web/img/ http://testnat.treebase.org:8080/treebase-web/images/'] },
-                          { 'path' => '/treebase-web/ http://testnat.treebase.org:8080/treebase-web/',
-                            'reverse_urls' => ['/treebase-web/ http://testnat.treebase.org:8080/treebase-web/'] },
-                          { 'path' => '/treebase-web/search/img/ http://testnat.treebase.org:8080/treebase-web/images/',
-                          'reverse_urls' => ['/treebase-web/search/img/ http://testnat.treebase.org:8080/treebase-web/images/'] },],
                           'port'              => 80,
                           'serveradmin'       => 'webmaster@naturalis.nl',
                           'priority'          => 10,
@@ -183,9 +178,7 @@ class role_treebase (
   }
   include apache::mod::php
   include apache::mod::rewrite
-  include apache::mod::speling
-  include apache::mod::proxy
-  include apache::mod::proxy_http
+  include apache::mod::jk
   # Install mod-jk
   package { 'libapache2-mod-jk':
     ensure        => installed,
