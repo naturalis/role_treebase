@@ -112,6 +112,8 @@ class role_treebase (
                           'rewrites'          => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
                           'proxy_pass'        => [{'path' => '/treebase-web/img/', 'url' => 'http://testnat.treebase.org:8080/treebase-web/images/',
                           'reverse_urls' => ['/treebase-web/img/', 'http://testnat.treebase.org:8080/treebase-web/images/'] },
+                          { 'path' => '/treebase-web/', 'url' => 'http://testnat.treebase.org:8080/treebase-web/',
+                            'reverse_urls' => ['/treebase-web/', 'http://testnat.treebase.org:8080/treebase-web/'] },
                           { 'path' => '/treebase-web/search/img/', 'url' => 'http://testnat.treebase.org:8080/treebase-web/images/',
                           'reverse_urls' => ['/treebase-web/search/img/', 'http://testnat.treebase.org:8080/treebase-web/images/'] },],
                           'port'              => 80,
