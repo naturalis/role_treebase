@@ -184,6 +184,15 @@ class role_treebase (
   include apache::mod::rewrite
   # Install mod-jk
   apache::mod { 'jk': }
+  class enable-mod-jk {
+    exec { "a2enmod jk":
+      path                => "/usr/bin:/usr/sbin:/bin",
+      alias               => 'enable-mod-jk',
+      creates             => '/etc/apache2/mods-enabled/jk.load',
+      notify              => Service['apache2'],
+      require             => Package['apache2'],
+    }
+  }
   package { 'libapache2-mod-jk':
     ensure        => installed,
     require       => Class['apache']
