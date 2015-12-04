@@ -182,6 +182,7 @@ class role_treebase (
   }
   include apache::mod::php
   include apache::mod::rewrite
+  include apache::mod::headers
   include apache::mod::cache
   include apache::mod::disk_cache
   # Install mod-jk
