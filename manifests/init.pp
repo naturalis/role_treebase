@@ -182,6 +182,7 @@ class role_treebase (
   }
   include apache::mod::php
   include apache::mod::rewrite
+  include apache::mod::cache_disk
   # Install mod-jk
   apache::mod { 'jk': }
   class enable-mod-jk {
@@ -214,6 +215,12 @@ class role_treebase (
     ensure => "link",
     target => "/etc/apache2/mods-available/jk.conf",
     notify => Service["apache2"]
+  }
+  file { '/etc/apache2/mods-available/cache_disk.conf':
+    ensure        => file,
+    mode          => '644',
+    content       => template('role_treebase/cache_disk.conf.erb'),
+    require       => Package['libapache2-mod-jk']
   }
   # Create Apache Vitual host
   create_resources('apache::vhost', $instances)
