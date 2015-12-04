@@ -84,38 +84,45 @@
 # Copyright 2015 Naturalis
 #
 class role_treebase (
-  $postgresql_dbname    = "treebasedb",
-  $postgresql_username  = "treebase_app",
-  $postgresql_password  = undef,
-  $treebase_owner       = "treebase_owner",
-  $treebase_read        = "treebase_read",
-  $treebase_url         = undef,
-  $treebase_smtp        = "smtp.nescent.org",
-  $treebase_adminmail   = "sysadmin@nescent.org",
-  $java_options         = "-Djava.awt.headless=true -Xms1024m -Xmx2048M -XX:+UseConcMarkSweepGC",
-  $purl_url             = "http://purl.org/phylo/treebase/phylows/",
-  $gitrepos             =
+  $postgresql_dbname         = "treebasedb",
+  $postgresql_username       = "treebase_app",
+  $postgresql_password       = undef,
+  $treebase_owner            = "treebase_owner",
+  $treebase_read             = "treebase_read",
+  $treebase_url              = undef,
+  $treebase_smtp             = "smtp.nescent.org",
+  $treebase_adminmail        = "sysadmin@nescent.org",
+  $java_options              = "-Djava.awt.headless=true -Xms1024m -Xmx2048M -XX:+UseConcMarkSweepGC",
+  $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
+  $gitrepos                  =
   [ {'tomcat6' =>
       {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
        'repokey'      => 'PRIVATE KEY here',
       },
    },
   ],
-  $webdirs              = ['/var/www/htdocs'],
-  $rwwebdirs            = ['/var/www/htdocs/cache'],
-  $instances            = {'treebase.naturalis.nl' => {
-                          'serveraliases'     => '*.naturalis.nl',
-                          'docroot'           => '/var/www/htdocs',
-                          'directories'       => [{ 'path' => '/var/www/htdocs',
-                          'options'           => '-Indexes +FollowSymLinks +MultiViews',
-                          'allow_override'    => 'All'}],
-                          'custom_fragment'   => 'JkMount /treebase-web* worker1',
-                          'rewrites'          => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
-                          'port'              => 80,
-                          'serveradmin'       => 'webmaster@naturalis.nl',
-                          'priority'          => 10,
-                          },
-                        },
+  $webdirs                   = ['/var/www/htdocs'],
+  $rwwebdirs                 = ['/var/www/htdocs/cache'],
+  $instances                 = {'treebase.naturalis.nl' => {
+                                 'serveraliases'        => '*.naturalis.nl',
+                                 'docroot'              => '/var/www/htdocs',
+                                 'directories'          => [{ 'path' => '/var/www/htdocs',
+                                 'options'              => '-Indexes +FollowSymLinks +MultiViews',
+                                 'allow_override'       => 'All'}],
+                                 'custom_fragment'      => 'JkMount /treebase-web* worker1',
+                                 'port'                 => 80,
+                                 'serveradmin'          => 'webmaster@naturalis.nl',
+                                 'priority'             => 10,
+                                 },
+                               },
+  $php_memory_limit          = '512M',
+  $upload_max_filesize       = '256M',
+  $post_max_size             = '384M',
+  $max_execution_time        = '-1',
+  $keepalive                 = 'On',
+  $max_keepalive_requests    = '150',
+  $keepalive_timeout         = '1500',
+  $timeout                   = '360000'
 ) {
   # Install tomcat 6
   package { 'tomcat6':
@@ -164,9 +171,6 @@ class role_treebase (
     upload_max_filesize       => $upload_max_filesize,
     post_max_size             => $post_max_size,
     max_execution_time        => $max_execution_time,
-    max_input_vars            => $max_input_vars,
-    max_input_time            => $max_input_time,
-    session_gc_maxlifetime    => $session_gc_maxlifetime,
   }
  # Install apache and enable modules
   class { 'apache':
@@ -179,15 +183,7 @@ class role_treebase (
   include apache::mod::php
   include apache::mod::rewrite
   # Install mod-jk
-  class enable-mod-jk {
-    exec { "a2enmod jk":
-      path                => "/usr/bin:/usr/sbin:/bin",
-      alias               => 'enable-mod-jk',
-      creates             => '/etc/apache2/mods-enabled/jk.load',
-      notify              => Service['apache2'],
-      require             => Package['apache2'],
-    }
-  }
+  apache::mod { 'jk': }
   package { 'libapache2-mod-jk':
     ensure        => installed,
     require       => Class['apache']
