@@ -209,6 +209,12 @@ class role_treebase (
     content       => template('role_treebase/jk.conf.erb'),
     require       => Package['libapache2-mod-jk']
   }
+  ->
+  file { "/etc/apache2/mods-enabled/jk.conf":
+    ensure => "link",
+    target => "/etc/apache2/mods-available/jk.conf",
+    notify => Service["apache2"]
+  }
   # Create Apache Vitual host
   create_resources('apache::vhost', $instances)
   # Deploy context.xml.default with our database settings
