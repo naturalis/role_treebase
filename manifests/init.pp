@@ -109,7 +109,8 @@ class role_treebase (
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
-                                 'custom_fragment'      => 'JkMount /treebase-web* worker1',
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat.treebase.org:8080/'}],
                                  'port'                 => 80,
                                  'serveradmin'          => 'webmaster@naturalis.nl',
                                  'priority'             => 10,
@@ -185,44 +186,13 @@ class role_treebase (
   include apache::mod::headers
   include apache::mod::cache
   include apache::mod::disk_cache
-  # Install mod-jk
-  apache::mod { 'jk': }
-  class enable-mod-jk {
-    exec { "a2enmod jk":
-      path                => "/usr/bin:/usr/sbin:/bin",
-      alias               => 'enable-mod-jk',
-      creates             => '/etc/apache2/mods-enabled/jk.load',
-      notify              => Service['apache2'],
-      require             => Package['apache2'],
-    }
-  }
-  package { 'libapache2-mod-jk':
-    ensure        => installed,
-    require       => Class['apache']
-  }
-  file { '/etc/libapache2-mod-jk/workers.properties':
-    ensure        => file,
-    mode          => '644',
-    content       => template('role_treebase/workers.properties.erb'),
-    require       => Package['libapache2-mod-jk']
-  }
-  file { '/etc/apache2/mods-available/jk.conf':
-    ensure        => file,
-    mode          => '644',
-    content       => template('role_treebase/jk.conf.erb'),
-    require       => Package['libapache2-mod-jk']
-  }
-  ->
-  file { "/etc/apache2/mods-enabled/jk.conf":
-    ensure => "link",
-    target => "/etc/apache2/mods-available/jk.conf",
-    notify => Service["apache2"]
-  }
+  include apache::mod::expires
+  include apache::mod::proxy
+  include apache::mod::proxy_http
   file { '/etc/apache2/mods-available/cache_disk.conf':
     ensure        => file,
     mode          => '644',
     content       => template('role_treebase/cache_disk.conf.erb'),
-    require       => Package['libapache2-mod-jk']
   }
   # Create Apache Vitual host
   create_resources('apache::vhost', $instances)
