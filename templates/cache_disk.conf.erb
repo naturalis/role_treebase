@@ -1,0 +1,49 @@
+<IfModule mod_cache_disk.c>
+#SetEnvIf Request_URI "^/treebase-web/search/study/summary.html$" EXPIREME
+#Header set "Expires" "Mon, 28 Jul 2014 23:30:00 GMT" env=EXPIREME
+#Header unset "Cache-Control" "must-revalidate, max-age=0, s-maxage=2592001"
+
+<Location /treebase-web/search/downloadAStudy.html>
+    RewriteEngine on
+    RewriteCond %{QUERY_STRING} ^(.*)id=(.*)&format=nexus$
+    RewriteRule   .*  - [E=FILENAME:S%2.nex]
+    Header set "Content-disposition" "attachment; filename=%{FILENAME}e" env=FILENAME
+    UnsetEnv FILENAME
+Header set "Cache-Control" "must-revalidate, max-age=0, s-maxage=2592001"
+</Location>
+
+<Location /treebase-web/search/study/anyObjectAsRDF.rdf>
+Header set "Cache-Control" "must-revalidate, max-age=0, s-maxage=2592001"
+</Location>
+
+<Location /treebase-web/search/downloadANexusFile.html>
+Header set "Cache-Control" "must-revalidate, max-age=0, s-maxage=2592001"
+</Location>
+<Location /treebase-web/search/downloadAMatrix.html>
+Header set "Cache-Control" "must-revalidate, max-age=0, s-maxage=2592001"
+</Location>
+<Location /treebase-web/search/downloadATree.html>
+Header set "Cache-Control" "must-revalidate, max-age=0, s-maxage=2592001"
+</Location>
+
+CacheRoot /var/cache/apache2/mod_cache_disk
+CacheEnable disk /treebase-web/search/downloadAStudy.html
+CacheEnable disk /treebase-web/search/study/anyObjectAsRDF.rdf
+CacheEnable disk /treebase-web/search/downloadANexusFile.html
+CacheEnable disk /treebase-web/search/downloadAMatrix.html
+CacheEnable disk /treebase-web/search/downloadATree.html
+#CacheEnable disk /treebase-web/scripts/
+CacheEnable disk /treebase-web/images/
+CacheEnable disk /treebase-web/styles/
+CacheDirLevels 2
+CacheDirLength 1
+CacheMinFileSize 1
+CacheMaxFileSize 50000000
+CacheIgnoreCacheControl On
+CacheIgnoreNoLastMod On
+CacheMaxExpire 2592001
+CacheDefaultExpire 2592001
+CacheIgnoreHeaders Set-Cookie
+CacheIgnoreURLSessionIdentifiers jsessionid
+
+</IfModule>
