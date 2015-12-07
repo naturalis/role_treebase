@@ -102,7 +102,6 @@ class role_treebase (
    },
   ],
   $webdirs                   = ['/var/www/htdocs'],
-  $rwwebdirs                 = ['/var/www/htdocs/cache'],
   $instances                 = {'treebase.naturalis.nl' => {
                                  'serveraliases'        => '*.naturalis.nl',
                                  'docroot'              => '/var/www/htdocs',
@@ -157,13 +156,6 @@ class role_treebase (
     group         => 'www-data',
     require       => Class['apache']
   }->
-  file { $rwwebdirs:
-    ensure        => 'directory',
-    mode          => '0777',
-    owner         => 'www-data',
-    group         => 'www-data',
-    require       => File[$webdirs]
-  }
   # install php module php-gd
   php::module { [ 'gd','mysql','curl' ]: }
 
@@ -231,7 +223,7 @@ class role_treebase (
     content       => template('role_treebase/server.xml.erb'),
   }
   # Deploy redirect index.html
-  file { '/var/www/htdocs/index.html':
+  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
     ensure        => file,
     owner         => 'root',
     group         => 'root',
@@ -256,6 +248,13 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web.war',
+  }
+  file { '/var/lib/tomcat6/lib':
+    ensure        => 'directory',
+    mode          => '0755',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    require       => Service['tomcat6'],
   }
   # deploy log4j
   file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':

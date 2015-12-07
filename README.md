@@ -42,8 +42,9 @@ To install Treebase with Puppet:
 ```
    $ sudo -u postgres psql
    $ ALTER USER postgres WITH ENCRYPTED PASSWORD 'changeme';  
+   $ \q
 ```
-* 4. Import the postgres database
+* 4. Import the postgres database (if there are errors do it another time).
 ```
    $ pg_restore -h localhost -U postgres -W <postgress_dump> -d treebasedb -v -c
 ```
