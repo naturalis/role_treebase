@@ -321,7 +321,7 @@ class role_treebase (
   }
   exec { 'install letsencrypt':
     command => '/opt/letsencrypt/letsencrypt-auto certonly --apache -d testnat2.treebase.org --email foppe.pieters@naturalis.nl --agree-tos',
-    creates => '/etc/letsencrypt/live/testnat.treebase.org/cert.pem',
+    creates => '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
     path =>  [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     refreshonly => true,
   }
