@@ -173,18 +173,28 @@ class role_treebase (
     max_keepalive_requests    => $max_keepalive_requests,
     keepalive_timeout         => $keepalive_timeout,
   }
+  # install apache mods
   include apache::mod::php
   include apache::mod::rewrite
   include apache::mod::headers
-  include apache::mod::cache
-  include apache::mod::disk_cache
   include apache::mod::expires
   include apache::mod::proxy
   include apache::mod::proxy_http
+  include apache::mod::cache
+  # mod_cache_disk is not so easy to enable
+  apache::mod {'cache_disk':}
+  # make config  for mod_cache_disk
   file { '/etc/apache2/mods-available/cache_disk.conf':
     ensure        => file,
     mode          => '644',
     content       => template('role_treebase/cache_disk.conf.erb'),
+  }
+  # make symlink to enable mod_cache_disk
+  file { '/etc/apache2/mods-enabled/cache_disk.conf':
+    ensure        => 'link',
+    target        => '/etc/apache2/mods-available/cache_disk.conf',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
   }
   # Create Apache Vitual host
   create_resources('apache::vhost', $instances)
