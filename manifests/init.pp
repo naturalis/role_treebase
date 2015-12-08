@@ -102,16 +102,16 @@ class role_treebase (
    },
   ],
   $webdirs                   = ['/var/www/htdocs'],
-  $instances                 = {'treebase.naturalis.nl' => {
-                                 'serveraliases'        => '*.naturalis.nl',
+  $instances                 = {'testnat2.treebase.org' => {
+                                 'serveraliases'        => '*.treebase.org',
                                  'docroot'              => '/var/www/htdocs',
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
-                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
-                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat.treebase.org:8080/'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat2.treebase.org:8080/treebase-web$1 [P]']}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat2.treebase.org:8080/'}],
                                  'port'                 => 80,
-                                 'serveradmin'          => 'webmaster@naturalis.nl',
+                                 'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
                                  },
                                },
@@ -305,5 +305,24 @@ class role_treebase (
   service { 'tomcat6':
     ensure        => running,
     enable        => true,
+  }
+  # install letsencrypt cert
+  vcsrepo { '/opt/letsencrypt':
+    ensure   => present,
+    provider => git,
+    source   => 'git://github.com/letsencrypt/letsencrypt.git',
+    revision => 'v0.1.0',
+    notify   => Exec['initialize letsencrypt'],
+  }
+  exec { 'initialize letsencrypt':
+    command     => "/opt/letsencrypt/letsencrypt-auto --agree-tos -h",
+    refreshonly => true,
+    notify      => Exec['install letsencrypt'],
+  }
+  exec { 'install letsencrypt':
+    command => '/opt/letsencrypt/letsencrypt-auto certonly --apache -d testnat2.treebase.org --email foppe.pieters@naturalis.nl --agree-tos',
+    creates => '/etc/letsencrypt/live/testnat.treebase.org/cert.pem',
+    path =>  [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    refreshonly => true,
   }
 }
