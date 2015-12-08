@@ -131,7 +131,7 @@ class role_treebase (
   # Install database
   class { 'postgresql::globals':
     manage_package_repo => true,
-    version             => '8.4',
+  #  version             => '8.4',
   }->
   class { 'postgresql::server': }
   # Create postgresql database and users
@@ -248,6 +248,21 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web.war',
+  }
+  # make symlink to treebase.log
+  file { '/var/lib/tomcat6/treebase.log':
+    ensure        => 'link',
+    target        => '/var/log/tomcat6/treebase.log',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+  }->
+  # Deploy treebase.log
+  file { '/var/log/tomcat6/treebase.log':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    mode          => '644',
+    notify        => Service['tomcat6'],
   }
   file { '/var/lib/tomcat6/lib':
     ensure        => 'directory',
