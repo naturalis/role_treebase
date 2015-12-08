@@ -102,7 +102,6 @@ class role_treebase (
    },
   ],
   $webdirs                   = ['/var/www/htdocs'],
-  $rwwebdirs                 = ['/var/www/htdocs/cache'],
   $instances                 = {'treebase.naturalis.nl' => {
                                  'serveraliases'        => '*.naturalis.nl',
                                  'docroot'              => '/var/www/htdocs',
@@ -132,7 +131,7 @@ class role_treebase (
   # Install database
   class { 'postgresql::globals':
     manage_package_repo => true,
-    version             => '8.4',
+  #  version             => '8.4',
   }->
   class { 'postgresql::server': }
   # Create postgresql database and users
@@ -157,13 +156,6 @@ class role_treebase (
     group         => 'www-data',
     require       => Class['apache']
   }->
-  file { $rwwebdirs:
-    ensure        => 'directory',
-    mode          => '0777',
-    owner         => 'www-data',
-    group         => 'www-data',
-    require       => File[$webdirs]
-  }
   # install php module php-gd
   php::module { [ 'gd','mysql','curl' ]: }
 
@@ -181,18 +173,28 @@ class role_treebase (
     max_keepalive_requests    => $max_keepalive_requests,
     keepalive_timeout         => $keepalive_timeout,
   }
+  # install apache mods
   include apache::mod::php
   include apache::mod::rewrite
   include apache::mod::headers
-  include apache::mod::cache
-  include apache::mod::disk_cache
   include apache::mod::expires
   include apache::mod::proxy
   include apache::mod::proxy_http
+  include apache::mod::cache
+  # mod_cache_disk is not so easy to enable
+  apache::mod {'cache_disk':}
+  # make config  for mod_cache_disk
   file { '/etc/apache2/mods-available/cache_disk.conf':
     ensure        => file,
     mode          => '644',
     content       => template('role_treebase/cache_disk.conf.erb'),
+  }
+  # make symlink to enable mod_cache_disk
+  file { '/etc/apache2/mods-enabled/cache_disk.conf':
+    ensure        => 'link',
+    target        => '/etc/apache2/mods-available/cache_disk.conf',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
   }
   # Create Apache Vitual host
   create_resources('apache::vhost', $instances)
@@ -231,7 +233,7 @@ class role_treebase (
     content       => template('role_treebase/server.xml.erb'),
   }
   # Deploy redirect index.html
-  file { '/var/www/htdocs/index.html':
+  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
     ensure        => file,
     owner         => 'root',
     group         => 'root',
@@ -256,6 +258,28 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web.war',
+  }
+  # make symlink to treebase.log
+  file { '/var/lib/tomcat6/treebase.log':
+    ensure        => 'link',
+    target        => '/var/log/tomcat6/treebase.log',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+  }->
+  # Deploy treebase.log
+  file { '/var/log/tomcat6/treebase.log':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    mode          => '644',
+    notify        => Service['tomcat6'],
+  }
+  file { '/var/lib/tomcat6/lib':
+    ensure        => 'directory',
+    mode          => '0755',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    require       => Service['tomcat6'],
   }
   # deploy log4j
   file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':
