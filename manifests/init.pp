@@ -93,7 +93,8 @@ class role_treebase (
   $treebase_smtp             = "smtp.nescent.org",
   $treebase_adminmail        = "sysadmin@nescent.org",
   $java_Xms                  = "512m",
-  $java_Xmx                  = "1024M",
+  $java_Xmx                  = "1024m",
+  $java_MaxPermSize          = "256m",
   $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos                  =
   [ {'tomcat6' =>
