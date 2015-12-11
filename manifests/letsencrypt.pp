@@ -5,24 +5,30 @@
 # Author Name <foppe.pieters@naturalis.nl>
 #
 #
-define role_treebase::letsencrypt ()
-{
+class role_treebase::letsencrypt (
+  path          = $role_treebase::letsencrypt_path,
+  repo          = $role_treebase::letsencrypt_repo,
+  version       = $role_treebase::letsencrypt_version,
+  live          = $role_treebase::letsencrypt_live,
+  email         = $role_treebase::letsencrypt_email,
+  domain        = $role_treebase::letsencrypt_domain,
+){
   # install letsencrypt cert
-  vcsrepo { role_treebase::letsencrypt_path:
+  vcsrepo { $path:
     ensure      => present,
     provider    => git,
-    source      => $role_treebase::letsencrypt_repo,
-    revision    => $role_treebase::letsencrypt_version,
+    source      => $repo,
+    revision    => $version,
     notify      => Exec['initialize letsencrypt'],
   }
   exec { 'initialize letsencrypt':
-    command     => '${role_treebase::letsencrypt_path}/letsencrypt-auto --agree-tos -h',
+    command     => '${path}/letsencrypt-auto --agree-tos -h',
     refreshonly => true,
     notify      => Exec['install letsencrypt'],
   }
   exec { 'install letsencrypt':
-    command     => '${role_treebase::letsencrypt_path}/letsencrypt-auto certonly --apache -d ${role_treebase::letsencrypt_domain} --email ${role_treebase::letsencrypt_email} --agree-tos',
-    creates     => $role_treebase::letsencrypt_live,
+    command     => '${path}/letsencrypt-auto certonly --apache -d ${domain} --email ${email} --agree-tos',
+    creates     => $live,
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     refreshonly => true,
   }
