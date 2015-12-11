@@ -124,16 +124,17 @@ class role_treebase (
   $keepalive                 = 'On',
   $max_keepalive_requests    = '150',
   $keepalive_timeout         = '1500',
-  $timeout                   = '360000'
+  $timeout                   = '360000',
+  $letsencrypt_path          = '/opt/letsencrypt',
+  $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
+  $letsencrypt_version       = 'v0.1.0',
+  $letsencrypt_live          = '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
+  $letsencrypt_email         = 'aut@naturalis.nl',
+  $letsencrypt_domain        = 'testnat2.treebase.org',
 ) {
-  # Install tomcat 6
-  package { 'tomcat6':
-    ensure        => installed,
-  }
   # Install database
   class { 'postgresql::globals':
     manage_package_repo => true,
-  #  version             => '8.4',
   }->
   class { 'postgresql::server': }
   # Create postgresql database and users
@@ -150,56 +151,15 @@ class role_treebase (
     createrole    => false,
     login         => true,
   }
-  #make webdirs
-  file { $webdirs:
-    ensure        => 'directory',
-    mode          => '0750',
-    owner         => 'root',
-    group         => 'www-data',
-    require       => Class['apache']
-  }->
-  # install php module php-gd
-  php::module { [ 'gd','mysql','curl' ]: }
-
-  php::ini { '/etc/php5/apache2/php.ini':
-    memory_limit              => $php_memory_limit,
-    upload_max_filesize       => $upload_max_filesize,
-    post_max_size             => $post_max_size,
-    max_execution_time        => $max_execution_time,
+  # Install tomcat 6
+  package { 'tomcat6':
+    ensure        => installed,
   }
- # Install apache and enable modules
-  class { 'apache':
-    default_mods              => true,
-    mpm_module                => 'prefork',
-    keepalive                 => $keepalive,
-    max_keepalive_requests    => $max_keepalive_requests,
-    keepalive_timeout         => $keepalive_timeout,
+  # make sure that the tomcat 6 services is running
+  service { 'tomcat6':
+    ensure        => running,
+    enable        => true,
   }
-  # install apache mods
-  include apache::mod::php
-  include apache::mod::rewrite
-  include apache::mod::headers
-  include apache::mod::expires
-  include apache::mod::proxy
-  include apache::mod::proxy_http
-  include apache::mod::cache
-  # mod_cache_disk is not so easy to enable
-  apache::mod {'cache_disk':}
-  # make config  for mod_cache_disk
-  file { '/etc/apache2/mods-available/cache_disk.conf':
-    ensure        => file,
-    mode          => '644',
-    content       => template('role_treebase/cache_disk.conf.erb'),
-  }
-  # make symlink to enable mod_cache_disk
-  file { '/etc/apache2/mods-enabled/cache_disk.conf':
-    ensure        => 'link',
-    target        => '/etc/apache2/mods-available/cache_disk.conf',
-    owner         => 'tomcat6',
-    group         => 'tomcat6',
-  }
-  # Create Apache Vitual host
-  create_resources('apache::vhost', $instances)
   # Deploy context.xml.default with our database settings
   file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
     ensure        => file,
@@ -242,6 +202,56 @@ class role_treebase (
     mode          => '644',
     content       => template('role_treebase/index.html.erb')
   }
+  #make webdirs for apache
+  file { $webdirs:
+    ensure        => 'directory',
+    mode          => '0750',
+    owner         => 'root',
+    group         => 'www-data',
+    require       => Class['apache']
+  }->
+  # install php module php-gd
+  php::module { [ 'gd','mysql','curl' ]: }
+  # set php ini file
+  php::ini { '/etc/php5/apache2/php.ini':
+    memory_limit              => $php_memory_limit,
+    upload_max_filesize       => $upload_max_filesize,
+    post_max_size             => $post_max_size,
+    max_execution_time        => $max_execution_time,
+  }
+ # Install apache and enable modules
+  class { 'apache':
+    default_mods              => true,
+    mpm_module                => 'prefork',
+    keepalive                 => $keepalive,
+    max_keepalive_requests    => $max_keepalive_requests,
+    keepalive_timeout         => $keepalive_timeout,
+  }
+  # install apache mods
+  include apache::mod::php
+  include apache::mod::rewrite
+  include apache::mod::headers
+  include apache::mod::expires
+  include apache::mod::proxy
+  include apache::mod::proxy_http
+  include apache::mod::cache
+  # mod_cache_disk is not so easy to enable
+  apache::mod {'cache_disk':}
+  # make config  for mod_cache_disk
+  file { '/etc/apache2/mods-available/cache_disk.conf':
+    ensure        => file,
+    mode          => '644',
+    content       => template('role_treebase/cache_disk.conf.erb'),
+  }
+  # make symlink to enable mod_cache_disk
+  file { '/etc/apache2/mods-enabled/cache_disk.conf':
+    ensure        => 'link',
+    target        => '/etc/apache2/mods-available/cache_disk.conf',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+  }
+  # Create Apache Vitual host
+  create_resources('apache::vhost', $instances)
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories
@@ -303,28 +313,6 @@ class role_treebase (
   file {'/var/lib/tomcat6/conf/logging.properties':
     ensure        => absent,
   }
-  # make sure that the tomcat 6 services is running
-  service { 'tomcat6':
-    ensure        => running,
-    enable        => true,
-  }
-  # install letsencrypt cert
-  vcsrepo { '/opt/letsencrypt':
-    ensure   => present,
-    provider => git,
-    source   => 'git://github.com/letsencrypt/letsencrypt.git',
-    revision => 'v0.1.0',
-    notify   => Exec['initialize letsencrypt'],
-  }
-  exec { 'initialize letsencrypt':
-    command     => "/opt/letsencrypt/letsencrypt-auto --agree-tos -h",
-    refreshonly => true,
-    notify      => Exec['install letsencrypt'],
-  }
-  exec { 'install letsencrypt':
-    command => '/opt/letsencrypt/letsencrypt-auto certonly --apache -d testnat2.treebase.org --email foppe.pieters@naturalis.nl --agree-tos',
-    creates => '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
-    path =>  [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    refreshonly => true,
-  }
+  # Install letsencrypt cert
+  class { 'role_treebase::letsencrypt': }
 }
