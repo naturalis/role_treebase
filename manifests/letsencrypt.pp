@@ -6,12 +6,12 @@
 #
 #
 class role_treebase::letsencrypt (
-  path          = $role_treebase::letsencrypt_path,
-  repo          = $role_treebase::letsencrypt_repo,
-  version       = $role_treebase::letsencrypt_version,
-  live          = $role_treebase::letsencrypt_live,
-  email         = $role_treebase::letsencrypt_email,
-  domain        = $role_treebase::letsencrypt_domain,
+  $path          = $role_treebase::letsencrypt_path,
+  $repo          = $role_treebase::letsencrypt_repo,
+  $version       = $role_treebase::letsencrypt_version,
+  $live          = $role_treebase::letsencrypt_live,
+  $email         = $role_treebase::letsencrypt_email,
+  $domain        = $role_treebase::letsencrypt_domain,
 ){
   # install letsencrypt cert
   vcsrepo { $path:
