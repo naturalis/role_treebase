@@ -265,7 +265,7 @@ class role_treebase (
     ensure        => file,
     mode          => '0644',
     content       => template('role_treebase/cache_disk.conf.erb'),
-    require       => Class['apache2'],
+    require       => Class['apache'],
   }
   # make symlink to enable mod_cache_disk
   file { '/etc/apache2/mods-enabled/cache_disk.conf':
@@ -273,7 +273,7 @@ class role_treebase (
     target        => '/etc/apache2/mods-available/cache_disk.conf',
     owner         => 'root',
     group         => 'root',
-    require       => Class['apache2'],
+    require       => Class['apache'],
   }
   # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
