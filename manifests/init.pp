@@ -183,7 +183,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    mode          => '644',
+    mode          => '0644',
     content       => template('role_treebase/context.xml.default.erb'),
     require       => Package['tomcat6'],
   }
@@ -192,7 +192,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'root',
     group         => 'root',
-    mode          => '755',
+    mode          => '0755',
     content       => template('role_treebase/tomcat6-init.erb'),
     notify        => Service['tomcat6'],
   }
@@ -201,7 +201,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'root',
     group         => 'root',
-    mode          => '644',
+    mode          => '0644',
     content       => template('role_treebase/tomcat6-etc.erb'),
     notify        => Service['tomcat6'],
   }
@@ -210,7 +210,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'root',
     group         => 'tomcat6',
-    mode          => '644',
+    mode          => '0644',
     content       => template('role_treebase/server.xml.erb'),
     require       => Package['tomcat6'],
   }
@@ -219,8 +219,8 @@ class role_treebase (
     ensure        => file,
     owner         => 'root',
     group         => 'root',
-    mode          => '644',
-    content       => template('role_treebase/index.html.erb')
+    mode          => '0644',
+    content       => template('role_treebase/index.html.erb'),
     require       => Package['tomcat6'],
   }
   #make webdirs for apache
@@ -261,7 +261,9 @@ class role_treebase (
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
-  file { '/etc/apach/opt/git/tomcat6/treebase-web', '0644',
+  file { '/etc/apache2/mods-available/cache_disk.conf':
+    ensure        => file,
+    mode          => '0644',
     content       => template('role_treebase/cache_disk.conf.erb'),
     require       => Class['apache2'],
   }
@@ -307,7 +309,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    mode          => '644',
+    mode          => '0644',
     notify        => Service['tomcat6'],
   }
   file { '/var/lib/tomcat6/lib':
@@ -322,7 +324,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'root',
-    mode          => '644',
+    mode          => '0644',
     source        => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
     require       => Package['tomcat6'],
     notify        => Service['tomcat6'],
@@ -332,7 +334,7 @@ class role_treebase (
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    mode          => '644',
+    mode          => '0644',
     source        => "puppet:///modules/role_treebase/log4j.properties",
     require       => Package['tomcat6'],
     notify        => Service['tomcat6'],
