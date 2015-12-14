@@ -185,6 +185,7 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '644',
     content       => template('role_treebase/context.xml.default.erb'),
+    require       => Package['tomcat6'],
   }
   # Deploy tomcat init script to support headless mesquite
   file { '/etc/init.d/tomcat6':
@@ -211,6 +212,7 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '644',
     content       => template('role_treebase/server.xml.erb'),
+    require       => Package['tomcat6'],
   }
   # Deploy redirect index.html
   file { '/var/lib/tomcat6/webapps/ROOT/index.html':
@@ -219,6 +221,7 @@ class role_treebase (
     group         => 'root',
     mode          => '644',
     content       => template('role_treebase/index.html.erb')
+    require       => Package['tomcat6'],
   }
   #make webdirs for apache
   file { $webdirs:
@@ -258,17 +261,17 @@ class role_treebase (
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
-  file { '/etc/apache2/mods-available/cache_disk.conf':
-    ensure        => file,
-    mode          => '644',
+  file { '/etc/apach/opt/git/tomcat6/treebase-web', '0644',
     content       => template('role_treebase/cache_disk.conf.erb'),
+    require       => Class['apache2'],
   }
   # make symlink to enable mod_cache_disk
   file { '/etc/apache2/mods-enabled/cache_disk.conf':
     ensure        => 'link',
     target        => '/etc/apache2/mods-available/cache_disk.conf',
-    owner         => 'tomcat6',
-    group         => 'tomcat6',
+    owner         => 'root',
+    group         => 'root',
+    require       => Class['apache2'],
   }
   # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
@@ -280,6 +283,7 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web',
+    require       => Package['tomcat6'],
   }
   # make symlink to mesquite
   file { '/var/lib/tomcat6/mesquite':
@@ -320,6 +324,8 @@ class role_treebase (
     group         => 'root',
     mode          => '644',
     source        => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
   }
   # deploy log4j properties
   file {'/var/lib/tomcat6/conf/log4j.properties':
@@ -328,10 +334,14 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '644',
     source        => "puppet:///modules/role_treebase/log4j.properties",
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
   }
   # remove old logging properties
   file {'/var/lib/tomcat6/conf/logging.properties':
     ensure        => absent,
+    require       => [Package['tomcat6'],File['/var/lib/tomcat6/conf/log4j.properties']],
+    notify        => Service['tomcat6'],
   }
   # Install letsencrypt cert
   class { 'role_treebase::letsencrypt': }

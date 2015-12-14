@@ -63,9 +63,7 @@ $repokeyname = $repouser
   }->
 # give known_hosts file the correct permissions
   file{ "/usr/share/${repouser}/.ssh/known_hosts":
-    mode      => '0600',
-    owner     => $repouser
-  }->
+    mode      => '0600',create_resources('role_treebase::repo', $gitre
 # checkout using vcsrepo
   vcsrepo { "${repolocation}/${repouser}":
     ensure    => $repoversion,
@@ -75,5 +73,8 @@ $repokeyname = $repouser
     revision  => $reporevision,
     owner     => $repoowner,
     group     => $repogroup,
+    before    => [File['/var/lib/tomcat6/webapps/treebase-web'],
+                  File['/var/lib/tomcat6/mesquite'],
+                  File['/var/lib/tomcat6/webapps/treebase-web.war']],
   }
 }
