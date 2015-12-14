@@ -185,7 +185,6 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '644',
     content       => template('role_treebase/context.xml.default.erb'),
-    require       => Service['tomcat6'],
   }
   # Deploy tomcat init script to support headless mesquite
   file { '/etc/init.d/tomcat6':
@@ -194,7 +193,6 @@ class role_treebase (
     group         => 'root',
     mode          => '755',
     content       => template('role_treebase/tomcat6-init.erb'),
-    require       => Service['tomcat6'],
     notify        => Service['tomcat6'],
   }
   # Deploy tomcat default to enable authbind
@@ -204,7 +202,6 @@ class role_treebase (
     group         => 'root',
     mode          => '644',
     content       => template('role_treebase/tomcat6-etc.erb'),
-    require       => Service['tomcat6'],
     notify        => Service['tomcat6'],
   }
   # Deploy tomcat server.xml to listen on port 80
@@ -214,7 +211,6 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '644',
     content       => template('role_treebase/server.xml.erb'),
-    require       => Service['tomcat6'],
   }
   # Deploy redirect index.html
   file { '/var/lib/tomcat6/webapps/ROOT/index.html':
@@ -222,8 +218,7 @@ class role_treebase (
     owner         => 'root',
     group         => 'root',
     mode          => '644',
-    content       => template('role_treebase/index.html.erb'),
-    require       => Service['tomcat6'],
+    content       => template('role_treebase/index.html.erb')
   }
   #make webdirs for apache
   file { $webdirs:
@@ -233,6 +228,15 @@ class role_treebase (
     group         => 'www-data',
     require       => Class['apache']
   }->
+  # install php module php-gd
+  php::module { [ 'gd','mysql','curl' ]: }
+  # set php ini file
+  php::ini { '/etc/php5/apache2/php.ini':
+    memory_limit              => $php_memory_limit,
+    upload_max_filesize       => $upload_max_filesize,
+    post_max_size             => $post_max_size,
+    max_execution_time        => $max_execution_time,
+  }
  # Install apache and enable modules
   class { 'apache':
     default_mods              => true,
@@ -258,7 +262,6 @@ class role_treebase (
     ensure        => file,
     mode          => '644',
     content       => template('role_treebase/cache_disk.conf.erb'),
-    require       => Service['apache2'],
   }
   # make symlink to enable mod_cache_disk
   file { '/etc/apache2/mods-enabled/cache_disk.conf':
@@ -266,19 +269,9 @@ class role_treebase (
     target        => '/etc/apache2/mods-available/cache_disk.conf',
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    require       => Service['apache2'],
   }
   # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
-  # install php module php-gd
-  php::module { [ 'gd','mysql','curl' ]: }
-  # set php ini file
-  php::ini { '/etc/php5/apache2/php.ini':
-    memory_limit              => $php_memory_limit,
-    upload_max_filesize       => $upload_max_filesize,
-    post_max_size             => $post_max_size,
-    max_execution_time        => $max_execution_time,
-  }
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories
@@ -287,19 +280,16 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web',
-    require       => Service['tomcat6'],
   }
   # make symlink to mesquite
   file { '/var/lib/tomcat6/mesquite':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/mesquite',
-    require       => Service['tomcat6'],
   }
   # make symlink to treebase-web.war
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web.war',
-    require       => Service['tomcat6'],
   }
   # make symlink to treebase.log
   file { '/var/lib/tomcat6/treebase.log':
@@ -307,7 +297,6 @@ class role_treebase (
     target        => '/var/log/tomcat6/treebase.log',
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    require       => Service['tomcat6'],
   }->
   # Deploy treebase.log
   file { '/var/log/tomcat6/treebase.log':
@@ -315,7 +304,6 @@ class role_treebase (
     owner         => 'tomcat6',
     group         => 'tomcat6',
     mode          => '644',
-    require       => Service['tomcat6'],
     notify        => Service['tomcat6'],
   }
   file { '/var/lib/tomcat6/lib':
@@ -332,7 +320,6 @@ class role_treebase (
     group         => 'root',
     mode          => '644',
     source        => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
-    require       => Service['tomcat6'],
   }
   # deploy log4j properties
   file {'/var/lib/tomcat6/conf/log4j.properties':
@@ -341,7 +328,6 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '644',
     source        => "puppet:///modules/role_treebase/log4j.properties",
-    require       => Service['tomcat6'],
   }
   # remove old logging properties
   file {'/var/lib/tomcat6/conf/logging.properties':
