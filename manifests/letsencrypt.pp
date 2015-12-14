@@ -30,9 +30,17 @@ class role_treebase::letsencrypt (
   }
   #installing cert for apache
   exec { 'install letsencrypt':
-    command     => "${path}/letsencrypt-auto certonly --apache -d ${domain} --email ${email} --agree-tos --server ${server}",
+    command     => "${path}/letsencrypt-auto certonly --apache -d ${domain} --email ${email} --agree-tos --server ${server} --renew-by-default",
     creates     => $live,
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     refreshonly => true,
+  }
+  # renew cert each month
+  file { '/etc/cron.monthly/renew_cert':
+    ensure        => file,
+    mode          => '644',
+    owner         => 'root',
+    group         => 'root',
+    content       => template('role_treebase/renew_cert.erb'),
   }
 }
