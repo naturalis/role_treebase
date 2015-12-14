@@ -6,11 +6,6 @@ TOMCAT6_USER=tomcat6
 # the default of tomcat6.
 TOMCAT6_GROUP=tomcat6
 
-# The home directory of the Java development kit (JDK). You need at least
-# JDK version 1.5. If JAVA_HOME is not set, some common directories for
-# OpenJDK, the Sun JDK, and various J2SE 1.5 versions are tried.
-#JAVA_HOME=/usr/lib/jvm/openjdk-6-jdk
-
 # You may pass JVM startup parameters to Java here. If unset, the default
 # options will be: -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC
 #
@@ -18,7 +13,61 @@ TOMCAT6_GROUP=tomcat6
 # response time). If you use that option and you run Tomcat on a machine with
 # exactly one CPU chip that contains one or two cores, you should also add
 # the "-XX:+CMSIncrementalMode" option.
-JAVA_OPTS="<%= @java_options %>"
+JAVA_OPTS="${JAVA_OPTS} -Djava.awt.headless=true"
+
+# discourage address map swapping by setting Xms and Xmx to the same value
+# http://confluence.atlassian.com/display/DOC/Garbage+Collector+Performance+Issues
+JAVA_OPTS="${JAVA_OPTS} -Xms<%= @java_Xms %>"
+JAVA_OPTS="${JAVA_OPTS} -Xmx<%= @java_Xmx %>"
+
+# Increase maximum perm size for web base applications to 4x the default amount
+# http://wiki.apache.org/tomcat/FAQ/Memoryhttp://wiki.apache.org/tomcat/FAQ/Memory
+JAVA_OPTS="${JAVA_OPTS} -XX:MaxPermSize=<%= @java_MaxPermSize %>"
+
+# Reset the default stack size for threads to a lower value (by 1/10th original)
+# By default this can be anywhere between 512k -> 1024k depending on x32 or x64
+# bit Java version.
+# http://www.springsource.com/files/uploads/tomcat/tomcatx-large-scale-deployments.pdf
+# http://www.oracle.com/technetwork/java/hotspotfaq-138619.html
+# -Xss192k"
+
+# Oracle Java as default, uses the serial garbage collector on the
+# Full Tenured heap. The Young space is collected in parallel, but the
+# Tenured is not. This means that at a time of load if a full collection
+# event occurs, since the event is a 'stop-the-world' serial event then
+# all application threads other than the garbage collector thread are
+# taken off the CPU. This can have severe consequences if requests continue
+# to accrue during these 'outage' periods. (specifically webservices, webapps)
+# [Also enables adaptive sizing automatically]
+# -XX:+UseParallelGC"
+
+# This is interpreted as a hint to the garbage collector that pause times
+# of <nnn> milliseconds or less are desired. The garbage collector will
+# adjust the  Java heap size and other garbage collection related parameters
+# in an attempt to keep garbage collection pauses shorter than <nnn> milliseconds.
+# http://java.sun.com/docs/hotspot/gc5.0/ergo5.html
+# -XX:MaxGCPauseMillis=1500"
+
+# A hint to the virtual machine that it.s desirable that not more than:
+# 1 / (1 + GCTimeRation) of the application execution time be spent in
+# the garbage collector.
+# http://themindstorms.wordpress.com/2009/01/21/advanced-jvm-tuning-for-low-pause/
+JAVA_OPTS="${JAVA_OPTS} -XX:GCTimeRatio=9"
+
+# The hotspot server JVM has specific code-path optimizations
+# which yield an approximate 10% gain over the client version.
+JAVA_OPTS="${JAVA_OPTS} -server"
+
+# Disable remote (distributed) garbage collection by Java clients
+# and remove ability for applications to call explicit GC collection
+JAVA_OPTS="${JAVA_OPTS} -XX:+DisableExplicitGC"
+
+# fasten garbage collection
+JAVA_OPTS="${JAVA_OPTS} -XX:+UseConcMarkSweepGC"
+
+# enabling permgen garbage
+JAVA_OPTS="${JAVA_OPTS} -XX:+CMSClassUnloadingEnabled"
+JAVA_OPTS="${JAVA_OPTS} -XX:+CMSPermGenSweepingEnabled"
 
 # To enable remote debugging uncomment the following line.
 # You will then be able to use a java debugger on port 8000.

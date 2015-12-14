@@ -75,5 +75,8 @@ $repokeyname = $repouser
     revision  => $reporevision,
     owner     => $repoowner,
     group     => $repogroup,
+    before    => [File['/var/lib/tomcat6/webapps/treebase-web'],
+                  File['/var/lib/tomcat6/mesquite'],
+                  File['/var/lib/tomcat6/webapps/treebase-web.war']],
   }
 }

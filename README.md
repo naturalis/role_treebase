@@ -52,6 +52,13 @@ To install Treebase with Puppet:
 ```
    $ sudo service tomcat6 restart
 ```
+* 6. Add the following to the vhost file:
+```
+ssl_cert: /etc/letsencrypt/live/testnat2.treebase.org/cert.pem
+ssl_key: /etc/letsencrypt/live/testnat2.treebase.org/privkey.pem
+ssl_chain: /etc/letsencrypt/live/testnat2.treebase.org/chain.pem
+additional_includes: /etc/letsencrypt/options-ssl-apache.conf
+```
 
 ## Usage
 ```

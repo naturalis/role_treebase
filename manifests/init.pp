@@ -92,7 +92,9 @@ class role_treebase (
   $treebase_url              = undef,
   $treebase_smtp             = "smtp.nescent.org",
   $treebase_adminmail        = "sysadmin@nescent.org",
-  $java_options              = "-Djava.awt.headless=true -Xms1024m -Xmx2048M -XX:+UseConcMarkSweepGC",
+  $java_Xms                  = "512m",
+  $java_Xmx                  = "1024m",
+  $java_MaxPermSize          = "256m",
   $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos                  =
   [ {'tomcat6' =>
@@ -102,36 +104,55 @@ class role_treebase (
    },
   ],
   $webdirs                   = ['/var/www/htdocs'],
-  $instances                 = {'treebase.naturalis.nl' => {
-                                 'serveraliases'        => '*.naturalis.nl',
+  $instances                 = {'testnat2.treebase.org' => {
+                                 'serveraliases'        => '*.treebase.org',
                                  'docroot'              => '/var/www/htdocs',
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
-                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat.treebase.org:8080/treebase-web$1 [P]']}],
-                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat.treebase.org:8080/'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat2.treebase.org:8080/treebase-web$1 [P]']}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat2.treebase.org:8080/'}],
                                  'port'                 => 80,
-                                 'serveradmin'          => 'webmaster@naturalis.nl',
+                                 'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
+                                 },
+                                 'testnat2.treebase.org-ssl' => {
+                                 'serveraliases'        => '*.treebase.org',
+                                 'docroot'              => '/var/www/htdocs',
+                                 'directories'          => [{ 'path' => '/var/www/htdocs',
+                                 'options'              => '-Indexes +FollowSymLinks +MultiViews',
+                                 'allow_override'       => 'All'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat2.treebase.org:8080/treebase-web$1 [P]']}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat2.treebase.org:8080/'}],
+                                 'port'                 => 443,
+                                 'serveradmin'          => 'aut@naturalis.nl',
+                                 'priority'             => 10,
+                                 'ssl'                  => true,
+                              #  'ssl_cert'             => '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
+                              #  'ssl_key'              => '/etc/letsencrypt/live/testnat2.treebase.org/privkey.pem',
+                              #  'ssl_chain'            => '/etc/letsencrypt/live/testnat2.treebase.org/chain.pem',
+                              #  'additional_includes'  => '/etc/letsencrypt/options-ssl-apache.conf',
                                  },
                                },
   $php_memory_limit          = '512M',
   $upload_max_filesize       = '256M',
   $post_max_size             = '384M',
-  $max_execution_time        = '-1',
-  $keepalive                 = 'On',
+  $max_execution_time        = '3600',
+  $keepalive                 = 'Off',
   $max_keepalive_requests    = '150',
   $keepalive_timeout         = '1500',
-  $timeout                   = '360000'
+  $timeout                   = '3600',
+  $letsencrypt_path          = '/opt/letsencrypt',
+  $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
+  $letsencrypt_version       = 'v0.1.0',
+  $letsencrypt_live          = '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
+  $letsencrypt_email         = 'aut@naturalis.nl',
+  $letsencrypt_domain        = 'testnat2.treebase.org',
+  $letsencrypt_server        = 'https://acme-staging.api.letsencrypt.org/directory', #https://acme-v01.api.letsencrypt.org/directory
 ) {
-  # Install tomcat 6
-  package { 'tomcat6':
-    ensure        => installed,
-  }
   # Install database
   class { 'postgresql::globals':
     manage_package_repo => true,
-  #  version             => '8.4',
   }->
   class { 'postgresql::server': }
   # Create postgresql database and users
@@ -148,7 +169,61 @@ class role_treebase (
     createrole    => false,
     login         => true,
   }
-  #make webdirs
+  # Install tomcat 6
+  package { 'tomcat6':
+    ensure        => installed,
+  }
+  # make sure that the tomcat 6 services is running
+  service { 'tomcat6':
+    ensure        => running,
+    enable        => true,
+  }
+  # Deploy context.xml.default with our database settings
+  file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    mode          => '0644',
+    content       => template('role_treebase/context.xml.default.erb'),
+    require       => Package['tomcat6'],
+  }
+  # Deploy tomcat init script to support headless mesquite
+  file { '/etc/init.d/tomcat6':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0755',
+    content       => template('role_treebase/tomcat6-init.erb'),
+    notify        => Service['tomcat6'],
+  }
+  # Deploy tomcat default to enable authbind
+  file { '/etc/default/tomcat6':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/tomcat6-etc.erb'),
+    notify        => Service['tomcat6'],
+  }
+  # Deploy tomcat server.xml to listen on port 80
+  file { '/var/lib/tomcat6/conf/server.xml':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'tomcat6',
+    mode          => '0644',
+    content       => template('role_treebase/server.xml.erb'),
+    require       => Package['tomcat6'],
+  }
+  # Deploy redirect index.html
+  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/index.html.erb'),
+    require       => Package['tomcat6'],
+  }
+  #make webdirs for apache
   file { $webdirs:
     ensure        => 'directory',
     mode          => '0750',
@@ -158,7 +233,7 @@ class role_treebase (
   }->
   # install php module php-gd
   php::module { [ 'gd','mysql','curl' ]: }
-
+  # set php ini file
   php::ini { '/etc/php5/apache2/php.ini':
     memory_limit              => $php_memory_limit,
     upload_max_filesize       => $upload_max_filesize,
@@ -181,65 +256,27 @@ class role_treebase (
   include apache::mod::proxy
   include apache::mod::proxy_http
   include apache::mod::cache
+  include apache::mod::ssl
+
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
   file { '/etc/apache2/mods-available/cache_disk.conf':
     ensure        => file,
-    mode          => '644',
+    mode          => '0644',
     content       => template('role_treebase/cache_disk.conf.erb'),
+    require       => Class['apache'],
   }
   # make symlink to enable mod_cache_disk
   file { '/etc/apache2/mods-enabled/cache_disk.conf':
     ensure        => 'link',
     target        => '/etc/apache2/mods-available/cache_disk.conf',
-    owner         => 'tomcat6',
-    group         => 'tomcat6',
+    owner         => 'root',
+    group         => 'root',
+    require       => Class['apache'],
   }
-  # Create Apache Vitual host
+  # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
-  # Deploy context.xml.default with our database settings
-  file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
-    ensure        => file,
-    owner         => 'tomcat6',
-    group         => 'tomcat6',
-    mode          => '644',
-    content       => template('role_treebase/context.xml.default.erb'),
-  }
-  # Deploy tomcat init script to support headless mesquite
-  file { '/etc/init.d/tomcat6':
-    ensure        => file,
-    owner         => 'root',
-    group         => 'root',
-    mode          => '755',
-    content       => template('role_treebase/tomcat6-init.erb'),
-    notify        => Service['tomcat6'],
-  }
-  # Deploy tomcat default to enable authbind
-  file { '/etc/default/tomcat6':
-    ensure        => file,
-    owner         => 'root',
-    group         => 'root',
-    mode          => '644',
-    content       => template('role_treebase/tomcat6-etc.erb'),
-    notify        => Service['tomcat6'],
-  }
-  # Deploy tomcat server.xml to listen on port 80
-  file { '/var/lib/tomcat6/conf/server.xml':
-    ensure        => file,
-    owner         => 'root',
-    group         => 'tomcat6',
-    mode          => '644',
-    content       => template('role_treebase/server.xml.erb'),
-  }
-  # Deploy redirect index.html
-  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
-    ensure        => file,
-    owner         => 'root',
-    group         => 'root',
-    mode          => '644',
-    content       => template('role_treebase/index.html.erb')
-  }
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories
@@ -248,6 +285,7 @@ class role_treebase (
   file { '/var/lib/tomcat6/webapps/treebase-web':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web',
+    require       => Package['tomcat6'],
   }
   # make symlink to mesquite
   file { '/var/lib/tomcat6/mesquite':
@@ -271,39 +309,42 @@ class role_treebase (
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    mode          => '644',
-    notify        => Service['tomcat6'],
+    mode          => '0644',
+    notify        => Package['tomcat6'],
   }
   file { '/var/lib/tomcat6/lib':
     ensure        => 'directory',
     mode          => '0755',
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    require       => Service['tomcat6'],
+    require       => Package['tomcat6'],
   }
   # deploy log4j
   file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'root',
-    mode          => '644',
+    mode          => '0644',
     source        => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
   }
   # deploy log4j properties
   file {'/var/lib/tomcat6/conf/log4j.properties':
     ensure        => file,
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    mode          => '644',
+    mode          => '0644',
     source        => "puppet:///modules/role_treebase/log4j.properties",
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
   }
   # remove old logging properties
   file {'/var/lib/tomcat6/conf/logging.properties':
     ensure        => absent,
+    require       => [Package['tomcat6'],File['/var/lib/tomcat6/conf/log4j.properties']],
+    notify        => Service['tomcat6'],
   }
-  # make sure that the tomcat 6 services is running
-  service { 'tomcat6':
-    ensure        => running,
-    enable        => true,
-  }
+  # Install letsencrypt cert
+  class { 'role_treebase::letsencrypt': }
 }
