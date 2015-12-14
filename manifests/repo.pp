@@ -63,7 +63,9 @@ $repokeyname = $repouser
   }->
 # give known_hosts file the correct permissions
   file{ "/usr/share/${repouser}/.ssh/known_hosts":
-    mode      => '0600',create_resources('role_treebase::repo', $gitre
+    mode      => '0600',
+    owner     => $repouser
+  }->
 # checkout using vcsrepo
   vcsrepo { "${repolocation}/${repouser}":
     ensure    => $repoversion,
