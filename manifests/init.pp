@@ -222,7 +222,7 @@ class role_treebase (
     owner         => 'root',
     group         => 'root',
     mode          => '644',
-    content       => template('role_treebase/index.html.erb')
+    content       => template('role_treebase/index.html.erb'),
     require       => Service['tomcat6'],
   }
   #make webdirs for apache
@@ -238,7 +238,7 @@ class role_treebase (
   # set php ini file
   php::ini { '/etc/php5/apache2/php.ini':
     memory_limit              => $php_memory_limit,
-    upload_max_filesize       => $upload_max_filesize,
+    upload_max_filesize8427140b07f45390ce630da8c9ac6e981ec48b97       => $upload_max_filesize,
     post_max_size             => $post_max_size,
     max_execution_time        => $max_execution_time,
   }
