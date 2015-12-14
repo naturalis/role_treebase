@@ -12,6 +12,7 @@ class role_treebase::letsencrypt (
   $live          = $role_treebase::letsencrypt_live,
   $email         = $role_treebase::letsencrypt_email,
   $domain        = $role_treebase::letsencrypt_domain,
+  $server        = $role_treebase::letsencrypt_server,
 ){
   # install letsencrypt repo
   vcsrepo { $path:
@@ -29,7 +30,7 @@ class role_treebase::letsencrypt (
   }
   #installing cert for apache
   exec { 'install letsencrypt':
-    command     => "${path}/letsencrypt-auto certonly --apache -d ${domain} --email ${email} --agree-tos",
+    command     => "${path}/letsencrypt-auto certonly --apache -d ${domain} --email ${email} --agree-tos --server ${server}",
     creates     => $live,
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     refreshonly => true,

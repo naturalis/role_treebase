@@ -116,21 +116,39 @@ class role_treebase (
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
                                  },
+                                 'testnat2.treebase.org-ssl' => {
+                                 'serveraliases'        => '*.treebase.org',
+                                 'docroot'              => '/var/www/htdocs',
+                                 'directories'          => [{ 'path' => '/var/www/htdocs',
+                                 'options'              => '-Indexes +FollowSymLinks +MultiViews',
+                                 'allow_override'       => 'All'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat2.treebase.org:8080/treebase-web$1 [P]']}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat2.treebase.org:8080/'}],
+                                 'port'                 => 443,
+                                 'serveradmin'          => 'aut@naturalis.nl',
+                                 'priority'             => 10,
+                                 'ssl'                  => true,
+                              #  'ssl_cert'             => '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
+                              #  'ssl_key'              => '/etc/letsencrypt/live/testnat2.treebase.org/privkey.pem',
+                              #  'ssl_chain'            => '/etc/letsencrypt/live/testnat2.treebase.org/chain.pem',
+                              #  'additional_includes'  => '/etc/letsencrypt/options-ssl-apache.conf',
+                                 },
                                },
   $php_memory_limit          = '512M',
   $upload_max_filesize       = '256M',
   $post_max_size             = '384M',
-  $max_execution_time        = '-1',
-  $keepalive                 = 'On',
+  $max_execution_time        = '3600',
+  $keepalive                 = 'Off',
   $max_keepalive_requests    = '150',
   $keepalive_timeout         = '1500',
-  $timeout                   = '360000',
+  $timeout                   = '3600',
   $letsencrypt_path          = '/opt/letsencrypt',
   $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
   $letsencrypt_version       = 'v0.1.0',
   $letsencrypt_live          = '/etc/letsencrypt/live/testnat2.treebase.org/cert.pem',
   $letsencrypt_email         = 'aut@naturalis.nl',
   $letsencrypt_domain        = 'testnat2.treebase.org',
+  $letsencrypt_server        = 'https://acme-staging.api.letsencrypt.org/directory', #https://acme-v01.api.letsencrypt.org/directory
 ) {
   # Install database
   class { 'postgresql::globals':
@@ -235,6 +253,8 @@ class role_treebase (
   include apache::mod::proxy
   include apache::mod::proxy_http
   include apache::mod::cache
+  include apache::mod::ssl
+
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
@@ -250,7 +270,7 @@ class role_treebase (
     owner         => 'tomcat6',
     group         => 'tomcat6',
   }
-  # Create Apache Vitual host
+  # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
   # General repo settings
   class { 'role_treebase::repogeneral': }
