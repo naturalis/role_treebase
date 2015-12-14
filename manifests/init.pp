@@ -233,15 +233,6 @@ class role_treebase (
     group         => 'www-data',
     require       => Class['apache']
   }->
-  # install php module php-gd
-  php::module { [ 'gd','mysql','curl' ]: }
-  # set php ini file
-  php::ini { '/etc/php5/apache2/php.ini':
-    memory_limit              => $php_memory_limit,
-    upload_max_filesize8427140b07f45390ce630da8c9ac6e981ec48b97       => $upload_max_filesize,
-    post_max_size             => $post_max_size,
-    max_execution_time        => $max_execution_time,
-  }
  # Install apache and enable modules
   class { 'apache':
     default_mods              => true,
@@ -279,6 +270,15 @@ class role_treebase (
   }
   # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
+  # install php module php-gd
+  php::module { [ 'gd','mysql','curl' ]: }
+  # set php ini file
+  php::ini { '/etc/php5/apache2/php.ini':
+    memory_limit              => $php_memory_limit,
+    upload_max_filesize       => $upload_max_filesize,
+    post_max_size             => $post_max_size,
+    max_execution_time        => $max_execution_time,
+  }
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories
