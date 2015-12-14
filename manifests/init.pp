@@ -310,14 +310,14 @@ class role_treebase (
     owner         => 'tomcat6',
     group         => 'tomcat6',
     mode          => '0644',
-    notify        => Service['tomcat6'],
+    notify        => Package['tomcat6'],
   }
   file { '/var/lib/tomcat6/lib':
     ensure        => 'directory',
     mode          => '0755',
     owner         => 'tomcat6',
     group         => 'tomcat6',
-    require       => Service['tomcat6'],
+    require       => Package['tomcat6'],
   }
   # deploy log4j
   file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':
