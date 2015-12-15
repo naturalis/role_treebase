@@ -258,7 +258,7 @@ class role_treebase (
     keepalive                 => $keepalive,
     max_keepalive_requests    => $max_keepalive_requests,
     keepalive_timeout         => $keepalive_timeout,
-    require                   => Class['role_treebase::letsencrypt']  
+    require                   => Class['role_treebase::letsencrypt']
   }
   # install php module php-gd
   class { 'apache::mod::php': }
@@ -311,11 +311,13 @@ class role_treebase (
   file { '/var/lib/tomcat6/mesquite':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/mesquite',
+    require       => Package['tomcat6'],
   }
   # make symlink to treebase-web.war
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web.war',
+    require       => Package['tomcat6'],
   }
   # make symlink to treebase.log
   file { '/var/lib/tomcat6/treebase.log':
@@ -323,6 +325,7 @@ class role_treebase (
     target        => '/var/log/tomcat6/treebase.log',
     owner         => 'tomcat6',
     group         => 'tomcat6',
+    require       => Package['tomcat6'],
   }->
   # Deploy treebase.log
   file { '/var/log/tomcat6/treebase.log':
@@ -330,7 +333,7 @@ class role_treebase (
     owner         => 'tomcat6',
     group         => 'tomcat6',
     mode          => '0644',
-    notify        => Package['tomcat6'],
+    require        => Package['tomcat6'],
   }
   file { '/etc/logrotate.d/logrotate_treebase':
      content => template('role_treebase/logrotate_treebase.erb'),
