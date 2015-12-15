@@ -110,8 +110,7 @@ class role_treebase (
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
-                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://testnat2.treebase.org:8080/treebase-web$1 [P]']}],
-                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://testnat2.treebase.org:8080/'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['/ https://testnat2.treebase.org [P]']}],
                                  'port'                 => 80,
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
@@ -168,6 +167,25 @@ class role_treebase (
   postgresql::server::role { "${treebase_read}":
     createrole    => false,
     login         => true,
+  }
+  # install database dump script
+  file { '/etc/cron.d/dump_postgres':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/dump_postgres.erb'),
+  }
+  # make cronjob to run midnight
+  file { '/etc/cron.d/dump_postgres':
+    path    => '/etc/cron.d/dump_postgres',
+    ensure  => present,
+    owner   => 'root',
+    group   => 'root',
+    mode    => 0644,
+    require => [Class['postgresql::server'],
+                Service['postgresql']],
+    content => "0 0 * * * root /usr/local/sbin/dumpdb\n";
   }
   # Install tomcat 6
   package { 'tomcat6':
@@ -312,6 +330,10 @@ class role_treebase (
     mode          => '0644',
     notify        => Package['tomcat6'],
   }
+  file { '/etc/logrotate.d/logrotate_treebase':
+     content => template('role_treebase/logrotate_treebase.erb'),
+     mode    => '0644',
+   }
   file { '/var/lib/tomcat6/lib':
     ensure        => 'directory',
     mode          => '0755',

@@ -10,9 +10,6 @@ class role_treebase::letsencrypt (
   $repo          = $role_treebase::letsencrypt_repo,
   $version       = $role_treebase::letsencrypt_version,
   $live          = $role_treebase::letsencrypt_live,
-  $email         = $role_treebase::letsencrypt_email,
-  $domain        = $role_treebase::letsencrypt_domain,
-  $server        = $role_treebase::letsencrypt_server,
 ){
   # install letsencrypt repo
   vcsrepo { $path:
@@ -20,25 +17,33 @@ class role_treebase::letsencrypt (
     provider    => git,
     source      => $repo,
     revision    => $version,
-    notify      => Exec['initialize letsencrypt'],
+  #  notify      => Exec['initialize letsencrypt'],
   }
   #installing letsencrypt
-  exec { 'initialize letsencrypt':
-    command     => "${path}/letsencrypt-auto --agree-tos -h",
-    refreshonly => true,
-    notify      => Exec['install letsencrypt'],
+  #exec { 'initialize letsencrypt':
+  #  command     => "${path}/letsencrypt-auto --agree-tos -h",
+  #  refreshonly => true,
+  #}
+  # install ini file
+  File { '$path/cli.ini':
+    ensure      => file,
+    mode        => '0644',
+    owner       => 'root',
+    group       => 'root',
+    content     => template('role_treebase/cli.ini.erb'),
   }
-  #installing cert for apache
+  #installing cert and authenticate on port 443, before apache binds the port
   exec { 'install letsencrypt':
-    command     => "${path}/letsencrypt-auto certonly --apache -d ${domain} --email ${email} --agree-tos --server ${server} --renew-by-default",
+    command     => "${path}/letsencrypt-auto certonly --config ${path}/cli.ini",
     creates     => $live,
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    refreshonly => true,
+    require     => [ File['$path/cli.ini'], Exec['initialize letsencrypt'] ]
+    before      => Class['apache'],
   }
   # renew cert each month
   file { '/etc/cron.monthly/renew_cert':
     ensure        => file,
-    mode          => '755',
+    mode          => '0644',
     owner         => 'root',
     group         => 'root',
     content       => template('role_treebase/renew_cert.erb'),
