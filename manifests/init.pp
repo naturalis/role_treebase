@@ -248,9 +248,9 @@ class role_treebase (
     owner         => 'root',
     group         => 'www-data',
     require       => Class['apache']
-  }->
+  }
   # Install letsencrypt cert
-  class { 'role_treebase::letsencrypt': } ->
+  class { 'role_treebase::letsencrypt': }
   # Install apache and enable modules
   class { 'apache':
     default_mods              => true,
@@ -258,24 +258,25 @@ class role_treebase (
     keepalive                 => $keepalive,
     max_keepalive_requests    => $max_keepalive_requests,
     keepalive_timeout         => $keepalive_timeout,
+    require                   => Class['role_treebase::letsencrypt']  
   }
   # install php module php-gd
-  class { 'apache::mod::php': } ->
-  php::module { [ 'gd','mysql','curl' ]: } ->
+  class { 'apache::mod::php': }
+  php::module { [ 'gd','mysql','curl' ]: }
   # set php ini file
   php::ini { '/etc/php5/apache2/php.ini':
     memory_limit              => $php_memory_limit,
     upload_max_filesize       => $upload_max_filesize,
     post_max_size             => $post_max_size,
     max_execution_time        => $max_execution_time,
-  }->
+  }
   # install apache mods
-  class { 'apache::mod::rewrite': } ->
-  class { 'apache::mod::headers': } ->
-  class { 'apache::mod::expires': } ->
-  class { 'apache::mod::proxy': } ->
-  class { 'apache::mod::proxy_http': } ->
-  class { 'apache::mod::cache': } ->
+  class { 'apache::mod::rewrite': }
+  class { 'apache::mod::headers': }
+  class { 'apache::mod::expires': }
+  class { 'apache::mod::proxy': }
+  class { 'apache::mod::proxy_http': }
+  class { 'apache::mod::cache': }
   class { 'apache::mod::ssl': }
   # Create Apache Virtual host
   create_resources('apache::vhost', $instances)
