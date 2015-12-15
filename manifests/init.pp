@@ -188,7 +188,7 @@ class role_treebase (
     content       => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
   }
   #make backupdir for postgres
-  file { '/opt/backups/pgsql':
+  file { '/opt/backup':
     ensure        => 'directory',
     mode          => '0750',
     owner         => 'postgres',
