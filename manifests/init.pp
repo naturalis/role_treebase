@@ -169,7 +169,7 @@ class role_treebase (
     login         => true,
   }
   # install database dump script
-  file { '/etc/cron.d/dump_postgres':
+  file { '/usr/local/sbin/dump_postgres':
     ensure        => file,
     owner         => 'root',
     group         => 'root',
@@ -185,7 +185,7 @@ class role_treebase (
     mode    => 0644,
     require => [Class['postgresql::server'],
                 Service['postgresql']],
-    content => "0 0 * * * root /usr/local/sbin/dumpdb\n";
+    content => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
   }
   # Install tomcat 6
   package { 'tomcat6':
