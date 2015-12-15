@@ -169,7 +169,7 @@ class role_treebase (
     login         => true,
   }
   # install database dump script
-  file { '/etc/cron.d/dump_postgres':
+  file { '/usr/local/sbin/dump_postgres':
     ensure        => file,
     owner         => 'root',
     group         => 'root',
@@ -185,7 +185,7 @@ class role_treebase (
     mode    => 0644,
     require => [Class['postgresql::server'],
                 Service['postgresql']],
-    content => "0 0 * * * root /usr/local/sbin/dumpdb\n";
+    content => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
   }
   # Install tomcat 6
   package { 'tomcat6':
@@ -248,8 +248,20 @@ class role_treebase (
     owner         => 'root',
     group         => 'www-data',
     require       => Class['apache']
-  }->
+  }
+  # Install letsencrypt cert
+  class { 'role_treebase::letsencrypt': }
+  # Install apache and enable modules
+  class { 'apache':
+    default_mods              => true,
+    mpm_module                => 'prefork',
+    keepalive                 => $keepalive,
+    max_keepalive_requests    => $max_keepalive_requests,
+    keepalive_timeout         => $keepalive_timeout,
+    require                   => Class['role_treebase::letsencrypt']
+  }
   # install php module php-gd
+  class { 'apache::mod::php': }
   php::module { [ 'gd','mysql','curl' ]: }
   # set php ini file
   php::ini { '/etc/php5/apache2/php.ini':
@@ -258,24 +270,16 @@ class role_treebase (
     post_max_size             => $post_max_size,
     max_execution_time        => $max_execution_time,
   }
- # Install apache and enable modules
-  class { 'apache':
-    default_mods              => true,
-    mpm_module                => 'prefork',
-    keepalive                 => $keepalive,
-    max_keepalive_requests    => $max_keepalive_requests,
-    keepalive_timeout         => $keepalive_timeout,
-  }
   # install apache mods
-  include apache::mod::php
-  include apache::mod::rewrite
-  include apache::mod::headers
-  include apache::mod::expires
-  include apache::mod::proxy
-  include apache::mod::proxy_http
-  include apache::mod::cache
-  include apache::mod::ssl
-
+  class { 'apache::mod::rewrite': }
+  class { 'apache::mod::headers': }
+  class { 'apache::mod::expires': }
+  class { 'apache::mod::proxy': }
+  class { 'apache::mod::proxy_http': }
+  class { 'apache::mod::cache': }
+  class { 'apache::mod::ssl': }
+  # Create Apache Virtual host
+  create_resources('apache::vhost', $instances)
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
@@ -283,7 +287,7 @@ class role_treebase (
     ensure        => file,
     mode          => '0644',
     content       => template('role_treebase/cache_disk.conf.erb'),
-    require       => Class['apache'],
+    require       => Class['apache']
   }
   # make symlink to enable mod_cache_disk
   file { '/etc/apache2/mods-enabled/cache_disk.conf':
@@ -293,8 +297,6 @@ class role_treebase (
     group         => 'root',
     require       => Class['apache'],
   }
-  # Create Apache Virtual host
-  create_resources('apache::vhost', $instances)
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories
@@ -309,11 +311,13 @@ class role_treebase (
   file { '/var/lib/tomcat6/mesquite':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/mesquite',
+    require       => Package['tomcat6'],
   }
   # make symlink to treebase-web.war
   file { '/var/lib/tomcat6/webapps/treebase-web.war':
     ensure        => 'link',
     target        => '/opt/git/tomcat6/treebase-web.war',
+    require       => Package['tomcat6'],
   }
   # make symlink to treebase.log
   file { '/var/lib/tomcat6/treebase.log':
@@ -321,6 +325,7 @@ class role_treebase (
     target        => '/var/log/tomcat6/treebase.log',
     owner         => 'tomcat6',
     group         => 'tomcat6',
+    require       => Package['tomcat6'],
   }->
   # Deploy treebase.log
   file { '/var/log/tomcat6/treebase.log':
@@ -328,7 +333,7 @@ class role_treebase (
     owner         => 'tomcat6',
     group         => 'tomcat6',
     mode          => '0644',
-    notify        => Package['tomcat6'],
+    require        => Package['tomcat6'],
   }
   file { '/etc/logrotate.d/logrotate_treebase':
      content => template('role_treebase/logrotate_treebase.erb'),
@@ -367,6 +372,4 @@ class role_treebase (
     require       => [Package['tomcat6'],File['/var/lib/tomcat6/conf/log4j.properties']],
     notify        => Service['tomcat6'],
   }
-  # Install letsencrypt cert
-  class { 'role_treebase::letsencrypt': }
 }

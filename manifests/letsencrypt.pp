@@ -17,33 +17,42 @@ class role_treebase::letsencrypt (
     provider    => git,
     source      => $repo,
     revision    => $version,
-  #  notify      => Exec['initialize letsencrypt'],
+    notify      => Exec['initialize letsencrypt'],
   }
   #installing letsencrypt
-  #exec { 'initialize letsencrypt':
-  #  command     => "${path}/letsencrypt-auto --agree-tos -h",
-  #  refreshonly => true,
-  #}
+  exec { 'initialize letsencrypt':
+    command     => "${path}/letsencrypt-auto --agree-tos -h",
+    refreshonly => true,
+  }
   # install ini file
-  File { '$path/cli.ini':
+  file { "${path}/cli.ini":
     ensure      => file,
     mode        => '0644',
     owner       => 'root',
     group       => 'root',
     content     => template('role_treebase/cli.ini.erb'),
+    require     => Exec['initialize letsencrypt'],
+  }
+  # install apache ssl config
+  file { "/etc/letsencrypt/options-ssl-apache.conf":
+    ensure      => file,
+    mode        => '0644',
+    owner       => 'root',
+    group       => 'root',
+    content     => template('role_treebase/options-ssl-apache.conf.erb'),
+    require     => Exec['initialize letsencrypt'],
   }
   #installing cert and authenticate on port 443, before apache binds the port
   exec { 'install letsencrypt':
     command     => "${path}/letsencrypt-auto certonly --config ${path}/cli.ini",
     creates     => $live,
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    require     => [ File['$path/cli.ini'], Exec['initialize letsencrypt'] ]
-    before      => Class['apache'],
+    require     => File["${path}/cli.ini"]
   }
   # renew cert each month
   file { '/etc/cron.monthly/renew_cert':
     ensure        => file,
-    mode          => '0644',
+    mode          => '0755',
     owner         => 'root',
     group         => 'root',
     content       => template('role_treebase/renew_cert.erb'),
