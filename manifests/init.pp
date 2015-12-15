@@ -258,7 +258,9 @@ class role_treebase (
     post_max_size             => $post_max_size,
     max_execution_time        => $max_execution_time,
   }
- # Install apache and enable modules
+  # Install letsencrypt cert
+  class { 'role_treebase::letsencrypt': } ->
+  # Install apache and enable modules
   class { 'apache':
     default_mods              => true,
     mpm_module                => 'prefork',
@@ -367,6 +369,4 @@ class role_treebase (
     require       => [Package['tomcat6'],File['/var/lib/tomcat6/conf/log4j.properties']],
     notify        => Service['tomcat6'],
   }
-  # Install letsencrypt cert
-  class { 'role_treebase::letsencrypt': }
 }

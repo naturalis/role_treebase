@@ -25,7 +25,7 @@ class role_treebase::letsencrypt (
   #  refreshonly => true,
   #}
   # install ini file
-  File { '$path/cli.ini':
+  file { "${path}/cli.ini":
     ensure      => file,
     mode        => '0644',
     owner       => 'root',
