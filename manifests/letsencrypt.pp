@@ -37,7 +37,7 @@ class role_treebase::letsencrypt (
     command     => "${path}/letsencrypt-auto certonly --config ${path}/cli.ini",
     creates     => $live,
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    require     => [ File["${path}/cli.ini"], Exec['initialize letsencrypt'] ]
+    require     => File["${path}/cli.ini"]
   }
   # renew cert each month
   file { '/etc/cron.monthly/renew_cert':
