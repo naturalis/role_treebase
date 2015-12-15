@@ -258,7 +258,7 @@ class role_treebase (
     keepalive                 => $keepalive,
     max_keepalive_requests    => $max_keepalive_requests,
     keepalive_timeout         => $keepalive_timeout,
-  } ->
+  }
   # install php module php-gd
   class { 'apache::mod::php': } ->
   php::module { [ 'gd','mysql','curl' ]: } ->
@@ -286,7 +286,7 @@ class role_treebase (
     ensure        => file,
     mode          => '0644',
     content       => template('role_treebase/cache_disk.conf.erb'),
-    require       => Class['apache'],
+    require       => Class['apache']
   }
   # make symlink to enable mod_cache_disk
   file { '/etc/apache2/mods-enabled/cache_disk.conf':
