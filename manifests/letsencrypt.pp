@@ -34,7 +34,7 @@ class role_treebase::letsencrypt (
     require     => Exec['initialize letsencrypt'],
   }
   # install apache ssl config
-  file { "${path}/options-ssl-apache.conf":
+  file { "/etc/letsencrypt/options-ssl-apache.conf":
     ensure      => file,
     mode        => '0644',
     owner       => 'root',
