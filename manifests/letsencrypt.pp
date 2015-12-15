@@ -52,7 +52,7 @@ class role_treebase::letsencrypt (
   # renew cert each month
   file { '/etc/cron.monthly/renew_cert':
     ensure        => file,
-    mode          => '0644',
+    mode          => '0755',
     owner         => 'root',
     group         => 'root',
     content       => template('role_treebase/renew_cert.erb'),
