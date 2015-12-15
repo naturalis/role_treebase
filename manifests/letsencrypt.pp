@@ -33,6 +33,15 @@ class role_treebase::letsencrypt (
     content     => template('role_treebase/cli.ini.erb'),
     require     => Exec['initialize letsencrypt'],
   }
+  # install apache ssl config
+  file { "${path}/options-ssl-apache.conf":
+    ensure      => file,
+    mode        => '0644',
+    owner       => 'root',
+    group       => 'root',
+    content     => template('role_treebase/options-ssl-apache.conf.erb'),
+    require     => Exec['initialize letsencrypt'],
+  }
   #installing cert and authenticate on port 443, before apache binds the port
   exec { 'install letsencrypt':
     command     => "${path}/letsencrypt-auto certonly --config ${path}/cli.ini",
