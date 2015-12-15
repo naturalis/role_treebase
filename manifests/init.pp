@@ -178,14 +178,21 @@ class role_treebase (
   }
   # make cronjob to run midnight
   file { '/etc/cron.d/dump_postgres':
-    path    => '/etc/cron.d/dump_postgres',
-    ensure  => present,
-    owner   => 'root',
-    group   => 'root',
-    mode    => 0644,
-    require => [Class['postgresql::server'],
-                Service['postgresql']],
-    content => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
+    path          => '/etc/cron.d/dump_postgres',
+    ensure        => present,
+    owner         => 'root',
+    group         => 'root',
+    mode          => 0644,
+    require       => [Class['postgresql::server'],
+                      Service['postgresql']],
+    content       => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
+  }
+  #make backupdir for postgres
+  file { '/opt/backup':
+    ensure        => 'directory',
+    mode          => '0750',
+    owner         => 'postgres',
+    group         => 'postgres',
   }
   # Install tomcat 6
   package { 'tomcat6':
@@ -333,11 +340,11 @@ class role_treebase (
     owner         => 'tomcat6',
     group         => 'tomcat6',
     mode          => '0644',
-    require        => Package['tomcat6'],
+    require       => Package['tomcat6'],
   }
   file { '/etc/logrotate.d/logrotate_treebase':
-     content => template('role_treebase/logrotate_treebase.erb'),
-     mode    => '0644',
+     content      => template('role_treebase/logrotate_treebase.erb'),
+     mode         => '0644',
    }
   file { '/var/lib/tomcat6/lib':
     ensure        => 'directory',
