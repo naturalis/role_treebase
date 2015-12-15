@@ -249,15 +249,6 @@ class role_treebase (
     group         => 'www-data',
     require       => Class['apache']
   }->
-  # install php module php-gd
-  php::module { [ 'gd','mysql','curl' ]: }
-  # set php ini file
-  php::ini { '/etc/php5/apache2/php.ini':
-    memory_limit              => $php_memory_limit,
-    upload_max_filesize       => $upload_max_filesize,
-    post_max_size             => $post_max_size,
-    max_execution_time        => $max_execution_time,
-  }
   # Install letsencrypt cert
   class { 'role_treebase::letsencrypt': } ->
   # Install apache and enable modules
@@ -267,17 +258,27 @@ class role_treebase (
     keepalive                 => $keepalive,
     max_keepalive_requests    => $max_keepalive_requests,
     keepalive_timeout         => $keepalive_timeout,
-  }
+  } ->
+  # install php module php-gd
+  class { 'apache::mod::php': } ->
+  php::module { [ 'gd','mysql','curl' ]: } ->
+  # set php ini file
+  php::ini { '/etc/php5/apache2/php.ini':
+    memory_limit              => $php_memory_limit,
+    upload_max_filesize       => $upload_max_filesize,
+    post_max_size             => $post_max_size,
+    max_execution_time        => $max_execution_time,
+  }->
   # install apache mods
-  include apache::mod::php
-  include apache::mod::rewrite
-  include apache::mod::headers
-  include apache::mod::expires
-  include apache::mod::proxy
-  include apache::mod::proxy_http
-  include apache::mod::cache
-  include apache::mod::ssl
-
+  class { 'apache::mod::rewrite': } ->
+  class { 'apache::mod::headers': } ->
+  class { 'apache::mod::expires': } ->
+  class { 'apache::mod::proxy': } ->
+  class { 'apache::mod::proxy_http': } ->
+  class { 'apache::mod::cache': } ->
+  class { 'apache::mod::ssl': }
+  # Create Apache Virtual host
+  create_resources('apache::vhost', $instances)
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
@@ -295,8 +296,6 @@ class role_treebase (
     group         => 'root',
     require       => Class['apache'],
   }
-  # Create Apache Virtual host
-  create_resources('apache::vhost', $instances)
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories

@@ -17,13 +17,13 @@ class role_treebase::letsencrypt (
     provider    => git,
     source      => $repo,
     revision    => $version,
-  #  notify      => Exec['initialize letsencrypt'],
+    notify      => Exec['initialize letsencrypt'],
   }
   #installing letsencrypt
-  #exec { 'initialize letsencrypt':
-  #  command     => "${path}/letsencrypt-auto --agree-tos -h",
-  #  refreshonly => true,
-  #}
+  exec { 'initialize letsencrypt':
+    command     => "${path}/letsencrypt-auto --agree-tos -h",
+    refreshonly => true,
+  }
   # install ini file
   file { "${path}/cli.ini":
     ensure      => file,
@@ -31,6 +31,7 @@ class role_treebase::letsencrypt (
     owner       => 'root',
     group       => 'root',
     content     => template('role_treebase/cli.ini.erb'),
+    require     => Exec['initialize letsencrypt'],
   }
   #installing cert and authenticate on port 443, before apache binds the port
   exec { 'install letsencrypt':
