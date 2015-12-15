@@ -187,6 +187,13 @@ class role_treebase (
                 Service['postgresql']],
     content => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
   }
+  #make backupdir for postgres
+  file { /opt/backups/pgsql:
+    ensure        => 'directory',
+    mode          => '0750',
+    owner         => 'postgres',
+    group         => 'postgres',
+  }
   # Install tomcat 6
   package { 'tomcat6':
     ensure        => installed,
