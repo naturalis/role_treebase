@@ -193,6 +193,7 @@ class role_treebase (
     mode          => '0750',
     owner         => 'postgres',
     group         => 'postgres',
+    require       => Class['postgresql::server'],
   }
   # Install tomcat 6
   package { 'tomcat6':
@@ -269,7 +270,7 @@ class role_treebase (
   }
   # install php module php-gd
   class { 'apache::mod::php': }
-  php::module { [ 'gd','mysql','curl' ]: }
+  php::module { [ 'gd','curl' ]: }
   # set php ini file
   php::ini { '/etc/php5/apache2/php.ini':
     memory_limit              => $php_memory_limit,
