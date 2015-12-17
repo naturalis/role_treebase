@@ -125,7 +125,7 @@ class role_treebase (
                                  'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},
                                                             {'path'         => '/treebase-web/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'},
                                                             {'path'         => '/treebase-web/search/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'}],
-                                 'ProxyTimeout'         => '86500',
+                                 'custom_fragment'      => 'ProxyTimeout 86500',
                                  'port'                 => 443,
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
