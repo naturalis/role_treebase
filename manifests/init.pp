@@ -308,6 +308,15 @@ class role_treebase (
     group         => 'root',
     require       => Class['apache'],
   }
+  # Deploy apache2 default to configure htcacheclean
+  file { '/etc/default/apache2':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/apache2-etc.erb'),
+    notify        => Service['apache2'],
+  }
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out repositories
