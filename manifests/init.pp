@@ -122,7 +122,10 @@ class role_treebase (
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
                                  'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']}],
-                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},
+                                                            {'path'         => '/treebase-web/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'},
+                                                            {'path'         => '/treebase-web/search/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'}],
+                                 'custom_fragment'      => 'ProxyTimeout 86500',
                                  'port'                 => 443,
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
@@ -304,6 +307,15 @@ class role_treebase (
     owner         => 'root',
     group         => 'root',
     require       => Class['apache'],
+  }
+  # Deploy apache2 default to configure htcacheclean
+  file { '/etc/default/apache2':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/apache2-etc.erb'),
+    notify        => Service['apache2'],
   }
   # General repo settings
   class { 'role_treebase::repogeneral': }
