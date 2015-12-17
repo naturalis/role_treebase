@@ -60,29 +60,77 @@ Production: https://acme-v01.api.letsencrypt.org/directory
 
 ## Usage
 ```
- class { 'role_treebase' :
-  postgresql_dbname    => "treebasedb",
-  postgresql_username  => "treebase_app",
-  postgresql_password  => "change_me",
-  treebase_owner       => "treebase_owner",
-  treebase_read        => "treebase_read",
-  treebase_url         => "treebase.org/treebase-web",
-  treebase_smtp        => "smtp.example.com",
-  treebase_adminmail   => "sysadmin@example.com",
-  java_options         => "-Djava.awt.headless=true -Xms2048m -Xmx16384M",
-  purl_url             => "http://purl.org/phylo/treebase/phylows/",
-  gitrepos             =>
+class role_treebase (
+  $postgresql_dbname         = "treebasedb",
+  $postgresql_username       = "treebase_app",
+  $postgresql_password       = undef,
+  $treebase_owner            = "treebase_owner",
+  $treebase_read             = "treebase_read",
+  $treebase_url              = "treebase.org",
+  $treebase_smtp             = "smtp.nescent.org",
+  $treebase_adminmail        = "sysadmin@nescent.org",
+  $java_Xms                  = "512m",
+  $java_Xmx                  = "1024m",
+  $java_MaxPermSize          = "256m",
+  $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
+  $gitrepos                  =
   [ {'tomcat6' =>
       {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
        'repokey'      => 'PRIVATE KEY here',
       },
    },
   ],
-}
+  $webdirs                   = ['/var/www/htdocs'],
+  $instances                 = {'treebase.org' => {
+                                 'serveraliases'        => '*.treebase.org',
+                                 'docroot'              => '/var/www/htdocs',
+                                 'directories'          => [{ 'path' => '/var/www/htdocs',
+                                 'options'              => '-Indexes +FollowSymLinks +MultiViews',
+                                 'allow_override'       => 'All'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/?(.*) https://%{SERVER_NAME}/$1 [R,L]']}],
+                                 'port'                 => 80,
+                                 'serveradmin'          => 'aut@naturalis.nl',
+                                 'priority'             => 10,
+                                 },
+                                 'treebase.org-ssl' => {
+                                 'serveraliases'        => '*.treebase.org',
+                                 'docroot'              => '/var/www/htdocs',
+                                 'directories'          => [{ 'path' => '/var/www/htdocs',
+                                 'options'              => '-Indexes +FollowSymLinks +MultiViews',
+                                 'allow_override'       => 'All'}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},
+                                                            {'path'         => '/treebase-web/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'},
+                                                            {'path'         => '/treebase-web/search/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'}],
+                                 'custom_fragment'      => 'ProxyTimeout 86500',
+                                 'port'                 => 443,
+                                 'serveradmin'          => 'aut@naturalis.nl',
+                                 'priority'             => 10,
+                                 'ssl'                  => true,
+                                 'ssl_cert'             => '/etc/letsencrypt/live/treebase.org/cert.pem',
+                                 'ssl_key'              => '/etc/letsencrypt/live/treebase.org/privkey.pem',
+                                 'ssl_chain'            => '/etc/letsencrypt/live/treebase.org/chain.pem',
+                                 'additional_includes'  => '/etc/letsencrypt/options-ssl-apache.conf',
+                                 },
+                               },
+  $keepalive                 = 'Off',
+  $max_keepalive_requests    = '150',
+  $keepalive_timeout         = '1500',
+  $timeout                   = '3600',
+  $letsencrypt_path          = '/opt/letsencrypt',
+  $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
+  $letsencrypt_version       = 'v0.1.0',
+  $letsencrypt_live          = '/etc/letsencrypt/live/treebase.org/cert.pem',
+  $letsencrypt_email         = 'aut@naturalis.nl',
+  $letsencrypt_domain        = 'treebase.org',
+  $letsencrypt_server        = 'https://acme-staging.api.letsencrypt.org/directory'
 ```
 
 ## Reference
-role_treebase is the only class in this module. Depends on the following modules:
+The default "Role_treebase" class installs postgresql, tomcat6, apache2 and deploys the treebase webapp.
+The class "letsencrypt" installs letsencrypt, authenticates through port 443 and install a ssl certificate.
+
+ These classes depend on the following modules:
   - puppetlabs/vcsrepo
   - puppetlabs/postgresql
 
