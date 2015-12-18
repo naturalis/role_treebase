@@ -1,9 +1,0 @@
-cd /opt/backup
-
-mv allroles.sql allroles.sql.yesterday
-mv treebasedb treebasedb.yesterday
-
-sudo -u postgres  /usr/bin/pg_dump -f postgres postgres && sudo /bin/gzip postgres
-sudo -u postgres  /usr/bin/pg_dump -f template1 template1 && sudo /bin/gzip template1
-sudo -u postgres  /usr/bin/pg_dump -f treebasedb treebasedb && sudo /bin/gzip treebasedb
-sudo -u postgres pg_dumpall -r > allroles.sql
