@@ -115,7 +115,7 @@ class role_treebase (
                                  'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},
                                                             {'path'         => '/treebase-web/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'},
                                                             {'path'         => '/treebase-web/search/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'}],
-                                 'custom_fragment'      => 'ProxyTimeout 86500',
+                                 'custom_fragment'      => 'ProxyTimeout 3604',
                                  'port'                 => 443,
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
@@ -156,33 +156,6 @@ class role_treebase (
   postgresql::server::role { "${treebase_read}":
     createrole    => false,
     login         => true,
-  }
-  # install database dump script
-  file { '/usr/local/sbin/dump_postgres':
-    ensure        => file,
-    owner         => 'root',
-    group         => 'root',
-    mode          => '0644',
-    content       => template('role_treebase/dump_postgres.erb'),
-  }
-  # make cronjob to run midnight
-  file { '/etc/cron.d/dump_postgres':
-    path          => '/etc/cron.d/dump_postgres',
-    ensure        => present,
-    owner         => 'root',
-    group         => 'root',
-    mode          => 0644,
-    require       => [Class['postgresql::server'],
-                      Service['postgresql']],
-    content       => "0 0 * * * root /usr/local/sbin/dump_postgres\n";
-  }
-  #make backupdir for postgres
-  file { '/opt/backup':
-    ensure        => 'directory',
-    mode          => '0750',
-    owner         => 'postgres',
-    group         => 'postgres',
-    require       => Class['postgresql::server'],
   }
   # Install tomcat 6
   package { 'tomcat6':
