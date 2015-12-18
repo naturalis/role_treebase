@@ -1,6 +1,6 @@
+![Logo of Treebase](https://treebase.org/treebase-web/images/logo.gif)
 # role_treebase
-
-#### Table of Contents
+#### Table of Contents :+1:
 
 1. [Overview](#overview)
 2. [Module Description - What the module does and why it is useful](#module-description)
@@ -24,13 +24,18 @@ The role::treebase class will bootstrap a Treebase ready environment.
 
 ### What role_treebase affects
 
-* Package: tomcat6  (WARNING: End of Life Q4 2016) :-(
-* Directory: /var/lib/tomcat6 will be overwritten with Treebase specific settings.
+* Packages: 
+	- tomcat6  (WARNING: End of Life Q4 2016) :-(
+	- postgresql
+	- apache2
+* Directory's:  
+	- '/var/lib/tomcat6' will be overwritten with Treebase specific settings.
+	- '/opt/letsencrypt' and '/etc/letsencrypt' will be created for ssl certificates. 
 * Database: postgresql database with 3 users (owner, read and app)
 
 ### Setup Requirements
 
-* Database dump
+* Dump from treebase database
 
 ### Installation
 
@@ -59,7 +64,6 @@ To install Treebase with Puppet:
 ```
 
 ## Usage
-:+1:
 ```puppet
 class role_treebase (
   $postgresql_dbname         = "treebasedb",
