@@ -77,14 +77,15 @@ class role_treebase (
   $postgresql_dbname         = "treebasedb",
   $postgresql_username       = "treebase_app",
   $postgresql_password       = undef,
+  $postgresql_version        = '9.3',
   $treebase_owner            = "treebase_owner",
   $treebase_read             = "treebase_read",
   $treebase_url              = "treebase.org",
   $treebase_smtp             = "smtp-relay.gmail.com",
   $treebase_adminmail        = "admin@treebase.org",
-  $java_Xms                  = "512m",
-  $java_Xmx                  = "1024m",
-  $java_MaxPermSize          = "256m",
+  $java_Xms                  = "1024m",
+  $java_Xmx                  = "4096m",
+  $java_MaxPermSize          = "1024m",
   $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos                  =
   [ {'tomcat6' =>
@@ -138,9 +139,18 @@ class role_treebase (
 ) {
   # Install database
   class { 'postgresql::globals':
-    manage_package_repo => true,
+    manage_package_repo           => true,
+    version                       => "${$postgresql_version}",
   }->
   class { 'postgresql::server': }
+  # add postgresql config from pgtune
+  postgresql::server::config_entry {'default_statistics_target': value => '100'}
+  postgresql::server::config_entry {'checkpoint_completion_target': value => '0.9'}
+  postgresql::server::config_entry {'effective_cache_size': value => '11GB'}
+  postgresql::server::config_entry {'work_mem': value => '80MB'}
+  postgresql::server::config_entry {'wal_buffers': value => '16MB'}
+  postgresql::server::config_entry {'checkpoint_segments': value => '32'}
+  postgresql::server::config_entry {'shared_buffers': value => '3840MB'}
   # Create postgresql database and users
   postgresql::server::db { "${postgresql_dbname}":
     user          => "${postgresql_username}",
