@@ -14,7 +14,7 @@
 
 ## Overview
 
-This puppet module deploys the Treebase java application (excluding the databse) and creates the necessary configuration to run the application.
+This puppet module deploys the Treebase java application (excluding the databse) and creates the necessary configuration to run the application. You can see the application running at: [treebase.org](https://treebase.org)
 
 ## Module Description
 
