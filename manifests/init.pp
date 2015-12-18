@@ -94,7 +94,7 @@ class role_treebase (
    },
   ],
   $webdirs                   = ['/var/www/htdocs'],
-  $instances                 = {'treebase.org' => {
+  $instances                 = {'treebase.org-nonssl' => {
                                  'serveraliases'        => '*.treebase.org',
                                  'docroot'              => '/var/www/htdocs',
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
@@ -105,7 +105,7 @@ class role_treebase (
                                  'serveradmin'          => 'admin@treebase.org',
                                  'priority'             => 10,
                                  },
-                                 'treebase.org-ssl' => {
+                                 'treebase.org' => {
                                  'serveraliases'        => '*.treebase.org',
                                  'docroot'              => '/var/www/htdocs',
                                  'directories'          => [{ 'path' => '/var/www/htdocs',

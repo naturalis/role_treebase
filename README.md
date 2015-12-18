@@ -39,27 +39,28 @@ To install Treebase with Puppet:
 * 1. Apply the role::treebase class to a server
 * 2. Manually copy the database dump to the server
 * 3. Change the password of the postgres user
-```
+```shell
    $ sudo -u postgres psql
    $ ALTER USER postgres WITH ENCRYPTED PASSWORD 'changeme';  
    $ \q
 ```
 * 4. Import the postgres database (if there are errors do it another time).
-```
+```shell
    $ pg_restore -h localhost -U postgres -W <postgress_dump> -d treebasedb -v -c
 ```
 * 5. Restart tomcat6.
-```
+```shell
    $ sudo service tomcat6 restart
 ```
 * 6. Change the $letsencrypt_server from staging to production if needed:
-```
-Staging: https://acme-staging.api.letsencrypt.org/directory
-Production: https://acme-v01.api.letsencrypt.org/directory
+```shell
+    Staging: https://acme-staging.api.letsencrypt.org/directory
+    Production: https://acme-v01.api.letsencrypt.org/directory
 ```
 
 ## Usage
-```
+:+1:
+```puppet
 class role_treebase (
   $postgresql_dbname         = "treebasedb",
   $postgresql_username       = "treebase_app",
@@ -81,7 +82,7 @@ class role_treebase (
    },
   ],
   $webdirs                   = ['/var/www/htdocs'],
-  $instances                 = {'treebase.org' => {
+  $instances                 = {'treebase.org-nonssl' => {
                                  'serveraliases'        => '*.treebase.org',
                                  'docroot'              => '/var/www/htdocs',
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
@@ -92,7 +93,7 @@ class role_treebase (
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
                                  },
-                                 'treebase.org-ssl' => {
+                                 'treebase.org' => {
                                  'serveraliases'        => '*.treebase.org',
                                  'docroot'              => '/var/www/htdocs',
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
@@ -127,12 +128,16 @@ class role_treebase (
 ```
 
 ## Reference
-The default "Role_treebase" class installs postgresql, tomcat6, apache2 and deploys the treebase webapp.
-The class "letsencrypt" installs letsencrypt, authenticates through port 443 and install a ssl certificate.
+* "role_treebase" installs postgresql, tomcat6, apache2 and deploys the treebase webapp.
+* "letsencrypt" installs letsencrypt, authenticates through port 443 and install a ssl certificate.
 
  These classes depend on the following modules:
-  - puppetlabs/vcsrepo
-  - puppetlabs/postgresql
+  - [puppetlabs/vcsrepo](https://github.com/puppetlabs/puppetlabs-vcsrepo)
+  - [puppetlabs/postgresql](https://github.com/puppetlabs/puppetlabs-postgresql)
+
+In production we are using more classes for helping us. ;)
+  - [naturalis/puppet-role_backup](https://github.com/naturalis/puppet-role_backup) for automated backups (uses [burp](http://burp.grke.org/) as backup mechanism).
+  - [naturalis/puppet-role_sensu](https://github.com/naturalis/puppet-role_sensu) for alerting and all kinds of checks.
 
 ## Limitations
 Only supported/tested OS: ubuntu LTS 14.04
