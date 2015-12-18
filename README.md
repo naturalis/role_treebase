@@ -24,13 +24,13 @@ The role::treebase class will bootstrap a Treebase ready environment.
 
 ### What role_treebase affects
 
-* Packages: 
+* Packages:
 	- tomcat6  (WARNING: End of Life Q4 2016) :-(
 	- postgresql
 	- apache2
 * Directory's:  
 	- '/var/lib/tomcat6' will be overwritten with Treebase specific settings.
-	- '/opt/letsencrypt' and '/etc/letsencrypt' will be created for ssl certificates. 
+	- '/opt/letsencrypt' and '/etc/letsencrypt' will be created for ssl certificates.
 * Database: postgresql database with 3 users (owner, read and app)
 
 ### Setup Requirements
@@ -104,9 +104,7 @@ class role_treebase (
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
                                  'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']}],
-                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},
-                                                            {'path'         => '/treebase-web/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'},
-                                                            {'path'         => '/treebase-web/search/img/', 'url' => 'http://treebase.org:8080/treebase-web/images/'}],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},],
                                  'custom_fragment'      => 'ProxyTimeout 86500',
                                  'port'                 => 443,
                                  'serveradmin'          => 'aut@naturalis.nl',
