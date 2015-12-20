@@ -146,3 +146,7 @@ Only supported/tested OS: ubuntu LTS 14.04
 
 ## Development
 Feel free to submit pull requests.
+
+## Authors
+- Foppe Pieters <foppe.pieters@naturalis.nl>
+- Pim Polderman <info@pimpolderman.nl>
