@@ -112,9 +112,15 @@ class role_treebase (
                                  'directories'          => [{ 'path' => '/var/www/htdocs',
                                  'options'              => '-Indexes +FollowSymLinks +MultiViews',
                                  'allow_override'       => 'All'}],
+                                 'custom_fragment'      => '<Location /treebase-web/monitoring>
+                                                            AuthType Basic
+                                                            AuthName "Treebase Web Monitoring"
+                                                            AuthUserFile /var/www/.monitoring-htauth
+                                                            Require valid-user
+                                                            </Location>
+                                                            ProxyTimeout 3604',
                                  'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']}],
                                  'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},],
-                                 'custom_fragment'      => 'ProxyTimeout 3604',
                                  'port'                 => 443,
                                  'serveradmin'          => 'aut@naturalis.nl',
                                  'priority'             => 10,
@@ -125,6 +131,7 @@ class role_treebase (
                                  'additional_includes'  => '/etc/letsencrypt/options-ssl-apache.conf',
                                  },
                                },
+  $monitoring_pass           = undef,
   $keepalive                 = 'Off',
   $max_keepalive_requests    = '150',
   $keepalive_timeout         = '1500',
@@ -274,6 +281,15 @@ class role_treebase (
     group         => 'root',
     mode          => '0644',
     content       => template('role_treebase/apache2-etc.erb'),
+    notify        => Service['apache2'],
+  }
+  # Deploy monitoring htpasswd
+  file { '/var/www/.monitoring-htauth':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/monitoring-htauth.erb'),
     notify        => Service['apache2'],
   }
   # General repo settings
