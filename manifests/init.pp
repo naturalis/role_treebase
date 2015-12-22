@@ -122,7 +122,7 @@ class role_treebase (
                                  'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']}],
                                  'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},],
                                  'port'                 => 443,
-                                 'serveradmin'          => 'aut@naturalis.nl',
+                                 'serveradmin'          => 'admin@treebase.org',
                                  'priority'             => 10,
                                  'ssl'                  => true,
                                  'ssl_cert'             => '/etc/letsencrypt/live/treebase.org/cert.pem',
