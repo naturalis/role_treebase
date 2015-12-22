@@ -1,4 +1,4 @@
-![Logo of Treebase](https://treebase.org/treebase-web/images/logo.gif)
+![Logo of Treebase](https://treebase.org/treebase-web/images/TreeBASE.png)
 # role_treebase
 #### Table of Contents :+1:
 
