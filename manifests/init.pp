@@ -119,7 +119,9 @@ class role_treebase (
                                                             Require valid-user
                                                             </Location>
                                                             ProxyTimeout 3604',
-                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']}],
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']},
+                                                            {'rewrite_cond' => ['%{HTTP_USER_AGENT}  ^.*Baiduspider.*$'],
+                                                             'rewrite_rule' => ['- [F]'],},],
                                  'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},],
                                  'port'                 => 443,
                                  'serveradmin'          => 'admin@treebase.org',
