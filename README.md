@@ -137,7 +137,8 @@ class role_treebase (
  These classes depend on the following modules:
   - [puppetlabs/vcsrepo](https://github.com/puppetlabs/puppetlabs-vcsrepo)
   - [puppetlabs/postgresql](https://github.com/puppetlabs/puppetlabs-postgresql)
-
+  - [puppetlabs/stdlib](https://github.com/puppetlabs/puppetlabs-stdlib)
+  - 
 In production we are using more classes for helping us. ;)
   - [naturalis/puppet-role_backup](https://github.com/naturalis/puppet-role_backup) for automated backups (uses [burp](http://burp.grke.org/) as backup mechanism).
   - [naturalis/puppet-role_sensu](https://github.com/naturalis/puppet-role_sensu) for alerting and all kinds of checks.
