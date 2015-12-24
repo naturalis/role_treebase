@@ -1,0 +1,21 @@
+#!/bin/sh
+# script to check server for extremely high load and restart Tomcat if the condition is matched
+check=`cat /proc/loadavg | sed 's/\./ /' | awk '{print $1}'`
+
+# define max load avarage when script is triggered
+max_load='25'
+
+# log file
+high_load_log='/var/log/tomcat6/high_load_restart.log';
+
+# init file
+tomcat6_init='/etc/init.d/tomcat6';
+
+if [ $check -gt "$max_load" ]; then
+    $tomcat6_init stop
+    sleep 5;
+    $tomcat6_init restart
+    echo "$(date) : Tomcat6 Restart due to excessive load | $check |" >> $high_load_log;
+else
+    echo "$(date) :  load is ok | $check |" >> $high_load_log;
+fi

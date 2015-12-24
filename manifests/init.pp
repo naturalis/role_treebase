@@ -138,6 +138,7 @@ class role_treebase (
   $max_keepalive_requests    = '150',
   $keepalive_timeout         = '1500',
   $timeout                   = '3600',
+  $cron_restart              = true,
   $letsencrypt_path          = '/opt/letsencrypt',
   $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
   $letsencrypt_version       = 'v0.1.0',
@@ -368,5 +369,21 @@ class role_treebase (
     ensure        => absent,
     require       => [Package['tomcat6'],File['/var/lib/tomcat6/conf/log4j.properties']],
     notify        => Service['tomcat6'],
+  }
+  if ($cron_restart == true)
+  {
+    file { '/usr/sbin/restart_tomcat_on_high_load':
+      ensure        => file,
+      owner         => 'root',
+      group         => 'root',
+      mode          => '0755',
+      content       => template('role_treebase/restart_tomcat_on_high_load.erb'),
+      require       => Service['tomcat6'],
+    }
+    cron { 'restart_tomcat_on_high_load':
+      command => '/usr/sbin/restart_tomcat_on_high_load',
+      user    => root,
+      minute  => '*/10',
+    }
   }
 }
