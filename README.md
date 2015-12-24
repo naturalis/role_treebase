@@ -120,6 +120,7 @@ class role_treebase (
   $max_keepalive_requests    = '150',
   $keepalive_timeout         = '1500',
   $timeout                   = '3600',
+  $cron_restart              = true,
   $letsencrypt_path          = '/opt/letsencrypt',
   $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
   $letsencrypt_version       = 'v0.1.0',
@@ -130,7 +131,7 @@ class role_treebase (
 ```
 
 ## Reference
-* "role_treebase" installs postgresql, tomcat6, apache2 and deploys the treebase webapp.
+* "role_treebase" installs Postgresql, Tomcat6, Apache2 and deploys the Treebase webapp. Every 5 minutes there is a cron check that restarts tomcat if cpu looad is excessive.
 * "letsencrypt" installs letsencrypt, authenticates through port 443 and install a ssl certificate.
 
  These classes depend on the following modules:

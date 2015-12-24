@@ -1,5 +1,7 @@
 #!/bin/sh
 # script to check server for extremely high load and restart Tomcat if the condition is matched
+
+# check cpu load last 1 minute
 check=`cat /proc/loadavg | sed 's/\./ /' | awk '{print $1}'`
 
 # define max load avarage when script is triggered

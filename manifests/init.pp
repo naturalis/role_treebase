@@ -383,7 +383,11 @@ class role_treebase (
     cron { 'restart_tomcat_on_high_load':
       command => '/usr/sbin/restart_tomcat_on_high_load',
       user    => root,
-      minute  => '*/10',
+      minute  => '*/5',
     }
+    file { '/etc/logrotate.d/logrotate_load':
+       content      => template('role_treebase/logrotate_load.erb'),
+       mode         => '0644',
+     }
   }
 }
