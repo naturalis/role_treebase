@@ -135,9 +135,10 @@ class role_treebase (
 * "letsencrypt" installs letsencrypt, authenticates through port 443 and install a ssl certificate.
 
  These classes depend on the following modules:
-  - [puppetlabs/vcsrepo](https://github.com/puppetlabs/puppetlabs-vcsrepo)
   - [puppetlabs/postgresql](https://github.com/puppetlabs/puppetlabs-postgresql)
+  - [puppetlabs/apache](https://github.com/puppetlabs/puppetlabs-apache)
   - [puppetlabs/stdlib](https://github.com/puppetlabs/puppetlabs-stdlib)
+  - [puppetlabs/vcsrepo](https://github.com/puppetlabs/puppetlabs-vcsrepo)
 
 In production we are using more classes for helping us. ;)
   - [naturalis/puppet-role_backup](https://github.com/naturalis/puppet-role_backup) for automated backups (uses [burp](http://burp.grke.org/) as backup mechanism).
