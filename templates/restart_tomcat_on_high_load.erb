@@ -5,7 +5,7 @@
 check=`cat /proc/loadavg | sed 's/\./ /' | awk '{print $1}'`
 
 # define max load avarage when script is triggered
-max_load='25'
+max_load='18'
 
 # log file
 high_load_log='/var/log/tomcat6/high_load_restart.log';
