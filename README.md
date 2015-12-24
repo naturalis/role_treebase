@@ -131,7 +131,7 @@ class role_treebase (
 ```
 
 ## Reference
-* "role_treebase" installs Postgresql, Tomcat6, Apache2 and deploys the Treebase webapp. Every 5 minutes there is a cron check that restarts tomcat if cpu looad is excessive.
+* "role_treebase" installs Postgresql, Tomcat6, Apache2 and deploys the Treebase webapp. Every 5 minutes there is a cron check that restarts tomcat if cpu load is excessive.
 * "letsencrypt" installs letsencrypt, authenticates through port 443 and install a ssl certificate.
 
  These classes depend on the following modules:

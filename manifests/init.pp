@@ -286,7 +286,7 @@ class role_treebase (
     content       => template('role_treebase/apache2-etc.erb'),
     notify        => Service['apache2'],
   }
-  # Deploy monitoring htpasswd
+  # Deploy htpasswd to protect monitoring part
   file { '/var/www/.monitoring-htauth':
     ensure        => file,
     owner         => 'root',
@@ -297,7 +297,7 @@ class role_treebase (
   }
   # General repo settings
   class { 'role_treebase::repogeneral': }
-  # Check out repositories
+  # Check out the repository
   create_resources('role_treebase::repo', $gitrepos)
   # make symlink to treebase-web
   file { '/var/lib/tomcat6/webapps/treebase-web':
@@ -333,10 +333,12 @@ class role_treebase (
     mode          => '0644',
     require       => Package['tomcat6'],
   }
+  # add logrotate to the log file
   file { '/etc/logrotate.d/logrotate_treebase':
      content      => template('role_treebase/logrotate_treebase.erb'),
      mode         => '0644',
    }
+   # make lib dir
   file { '/var/lib/tomcat6/lib':
     ensure        => 'directory',
     mode          => '0755',
@@ -344,7 +346,7 @@ class role_treebase (
     group         => 'tomcat6',
     require       => Package['tomcat6'],
   }
-  # deploy log4j
+  # deploy log4j in the lib dir
   file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':
     ensure        => file,
     owner         => 'tomcat6',
@@ -372,6 +374,7 @@ class role_treebase (
   }
   if ($cron_restart == true)
   {
+    # script to restart tomcat6 when cpu load is excessive
     file { '/usr/sbin/restart_tomcat_on_high_load':
       ensure        => file,
       owner         => 'root',
@@ -380,11 +383,13 @@ class role_treebase (
       content       => template('role_treebase/restart_tomcat_on_high_load.erb'),
       require       => Service['tomcat6'],
     }
+    # make cronjob to run every 5 minutes
     cron { 'restart_tomcat_on_high_load':
       command => '/usr/sbin/restart_tomcat_on_high_load',
       user    => root,
       minute  => '*/5',
     }
+    # add logrotate to the log file
     file { '/etc/logrotate.d/logrotate_load':
        content      => template('role_treebase/logrotate_load.erb'),
        mode         => '0644',
