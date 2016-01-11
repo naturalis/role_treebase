@@ -18,6 +18,4 @@ if [ $check -gt "$max_load" ]; then
     sleep 5;
     $tomcat6_init restart
     echo "$(date) : Tomcat6 Restart due to excessive load | $check |" >> $high_load_log;
-else
-    echo "$(date) :  load is ok | $check |" >> $high_load_log;
 fi
