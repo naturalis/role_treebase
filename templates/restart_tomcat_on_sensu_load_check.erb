@@ -10,7 +10,7 @@ high_load_log='/var/log/tomcat6/high_load_restart.log';
 # init file
 tomcat6_init='/etc/init.d/tomcat6';
 
-if [ $check = "OK:" ]; then
+if [ $check != "OK:" ]; then
     $tomcat6_init stop
     sleep 5;
     $tomcat6_init restart
