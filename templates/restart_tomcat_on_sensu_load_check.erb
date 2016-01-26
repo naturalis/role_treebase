@@ -1,0 +1,18 @@
+#!/bin/sh
+# script to check server for extremely high load and restart Tomcat if the condition is matched
+
+# check the sensu load check
+check=`/opt/sensu/embedded/bin/ruby -C/opt/sensu/embedded/bin check-load.rb -w 99,0.95,0.9 -c 99,0.99,0.95 --per-core | awk '{print $2}'`
+
+# log file
+high_load_log='/var/log/tomcat6/high_load_restart.log';
+
+# init file
+tomcat6_init='/etc/init.d/tomcat6';
+
+if [ $check = "OK:" ]; then
+    $tomcat6_init stop
+    sleep 5;
+    $tomcat6_init restart
+    echo "$(date) : Tomcat6 Restart due to excessive load (sensucheck) | $check |" >> $high_load_log;
+fi
