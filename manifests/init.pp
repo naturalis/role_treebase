@@ -389,6 +389,21 @@ class role_treebase (
       user    => root,
       minute  => '*/5',
     }
+    # 2nd script to restart tomcat6 when cpu sensuloadcheck is excessive
+    file { '/usr/sbin/restart_tomcat_on_sensu_load_check':
+      ensure        => file,
+      owner         => 'root',
+      group         => 'root',
+      mode          => '0755',
+      content       => template('role_treebase/restart_tomcat_on_sensu_load_check.erb'),
+      require       => Service['tomcat6'],
+    }
+    # make cronjob to run every 5 minutes
+    cron { 'restart_tomcat_on_high_sensu_load_check':
+      command => '/usr/sbin/restart_tomcat_on_sensu_load_check',
+      user    => root,
+      minute  => '*/5',
+    }
     # add logrotate to the log file
     file { '/etc/logrotate.d/logrotate_load':
        content      => template('role_treebase/logrotate_load.erb'),
