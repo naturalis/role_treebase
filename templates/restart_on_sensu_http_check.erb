@@ -1,5 +1,5 @@
 #!/bin/sh
-# script to check server for http header (sensu check) and restart tomcat if needed
+# script to check server for http header (sensu check) and restart if needed
 
 # check the sensu load check
 check=`/opt/sensu/embedded/bin/ruby -C/opt/sensu/embedded/bin check-http.rb --url https://treebase.org/treebase-web/home.html  -q 'TreeBASE Web' | awk '{print $2}'`
@@ -7,12 +7,9 @@ check=`/opt/sensu/embedded/bin/ruby -C/opt/sensu/embedded/bin check-http.rb --ur
 # log file
 log='/var/log/tomcat6/sensu_checks_restart.log';
 
-# init file
-tomcat6_init='/etc/init.d/tomcat6';
-
 if [ $check != "OK:" ]; then
-    $tomcat6_init stop
     sleep 5;
-    $tomcat6_init restart
-    echo "$(date) : Tomcat6 Restart due to missing http header (sensucheck) | $check |" >> $log;
+    echo "$(date) : Restart due to missing http header (sensucheck) | $check |" >> $log;
+    sleep 5
+    reboot now
 fi

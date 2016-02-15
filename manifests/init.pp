@@ -384,7 +384,7 @@ class role_treebase (
       require       => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
-    cron { 'restart_tomcat_on_sensu_http_check':
+    cron { 'restart_on_sensu_http_check':
       command => '/usr/sbin/restart_on_sensu_http_check',
       user    => root,
       minute  => '*/5',
