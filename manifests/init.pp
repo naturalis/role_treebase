@@ -374,33 +374,33 @@ class role_treebase (
   }
   if ($cron_restart == true)
   {
-    # script to restart tomcat6 when http header (sensu check) is not found
-    file { '/usr/sbin/restart_tomcat_on_sensu_http_check':
+    # script to restart when http header (sensu check) is not found
+    file { '/usr/sbin/restart_on_sensu_http_check':
       ensure        => file,
       owner         => 'root',
       group         => 'root',
       mode          => '0755',
-      content       => template('role_treebase/restart_tomcat_on_sensu_http_check.erb'),
+      content       => template('role_treebase/restart_on_sensu_http_check.erb'),
       require       => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
     cron { 'restart_tomcat_on_sensu_http_check':
-      command => '/usr/sbin/restart_tomcat_on_sensu_http_check',
+      command => '/usr/sbin/restart_on_sensu_http_check',
       user    => root,
       minute  => '*/5',
     }
-    # 2nd script to restart tomcat6 when cpu load (sensu check) is excessive
-    file { '/usr/sbin/restart_tomcat_on_sensu_load_check':
+    # 2nd script to restart when cpu load (sensu check) is excessive
+    file { '/usr/sbin/restart_on_sensu_load_check':
       ensure        => file,
       owner         => 'root',
       group         => 'root',
       mode          => '0755',
-      content       => template('role_treebase/restart_tomcat_on_sensu_load_check.erb'),
+      content       => template('role_treebase/restart_on_sensu_load_check.erb'),
       require       => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
-    cron { 'restart_tomcat_on_sensu_load_check':
-      command => '/usr/sbin/restart_tomcat_on_sensu_load_check',
+    cron { 'restart_on_sensu_load_check':
+      command => '/usr/sbin/restart_on_sensu_load_check',
       user    => root,
       minute  => '*/5',
     }
