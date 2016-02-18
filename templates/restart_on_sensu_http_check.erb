@@ -11,5 +11,5 @@ if [ $check != "OK:" ]; then
     sleep 5;
     echo "$(date) : Restart due to missing http header (sensucheck) | $check |" >> $log;
     sleep 5
-    reboot now
+    sudo reboot now
 fi
