@@ -2,7 +2,7 @@
 
 /usr/bin/service apache2 stop
 cd <%= @letsencrypt_path %>
-./letsencrypt-auto certonly  --config /<%= @letsencrypt_path %>/cli.ini
+./letsencrypt-auto certonly  --config <%= @letsencrypt_path %>/cli.ini
 if [ $? -ne 0 ]
  then
         ERRORLOG=`tail /var/log/letsencrypt/letsencrypt.log`
