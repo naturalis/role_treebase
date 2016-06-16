@@ -292,6 +292,7 @@ class role_treebase (
     owner         => 'root',
     group         => 'root',
     mode          => '0644',
+    require       => File[$webdirs],
     content       => template('role_treebase/monitoring-htauth.erb'),
     notify        => Service['apache2'],
   }
