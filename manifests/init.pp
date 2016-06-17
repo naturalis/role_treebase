@@ -427,6 +427,7 @@ class role_treebase (
     cron { 'copy-database':
       command     => '/usr/sbin/copy-database',
       user        => ubuntu,
+      minute      => '0',
       hour        => '*/6',
     }
     # script to drop tables and import new dump
@@ -442,6 +443,7 @@ class role_treebase (
     cron { 'restore-database':
       command     => '/usr/sbin/restore-database',
       user        => postgres,
+      minute      => '0',
       hour        => '*/12',
     }
     # add logrotate to the log file
