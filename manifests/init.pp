@@ -334,7 +334,7 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '0644',
     require       => Package['tomcat6'],
-  }
+  } # Deploy apache2 default to configure htcacheclean
   # add logrotate to the log file
   file { '/etc/logrotate.d/logrotate_treebase':
      content      => template('role_treebase/logrotate_treebase.erb'),
@@ -421,7 +421,7 @@ class role_treebase (
       group       => 'root',
       mode        => '0755',
       content     => template('role_treebase/copy-database.erb'),
-      require     => Service['postgres'],
+      require     => Service['postgresql'],
     }
     # make cronjob to run every 6 hours
     cron { 'copy-database':
@@ -436,7 +436,7 @@ class role_treebase (
       group       => 'root',
       mode        => '0755',
       content     => template('role_treebase/restore-database.erb'),
-      require     => Service['postgres'],
+      require     => Service['postgresql'],
     }
     # make cronjob to run every 12 hours
     cron { 'restore-database':
