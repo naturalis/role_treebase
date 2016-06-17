@@ -139,6 +139,7 @@ class role_treebase (
   $keepalive_timeout         = '1500',
   $timeout                   = '3600',
   $cron_restart              = true,
+  $dev_server                = false,
   $letsencrypt_path          = '/opt/letsencrypt',
   $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
   $letsencrypt_version       = 'v0.1.0',
@@ -277,7 +278,7 @@ class role_treebase (
     group         => 'root',
     require       => Class['apache'],
   }
-  # Deploy apache2 default to configure htcacheclean
+   # Deploy apache2 default to configure htcacheclean
   file { '/etc/default/apache2':
     ensure        => file,
     owner         => 'root',
@@ -377,38 +378,76 @@ class role_treebase (
   {
     # script to restart when http header (sensu check) is not found
     file { '/usr/sbin/restart_on_sensu_http_check':
-      ensure        => file,
-      owner         => 'root',
-      group         => 'root',
-      mode          => '0755',
-      content       => template('role_treebase/restart_on_sensu_http_check.erb'),
-      require       => Service['tomcat6'],
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restart_on_sensu_http_check.erb'),
+      require     => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
     cron { 'restart_on_sensu_http_check':
-      command => '/usr/sbin/restart_on_sensu_http_check',
-      user    => root,
-      minute  => '*/5',
+      command     => '/usr/sbin/restart_on_sensu_http_check',
+      user        => root,
+      minute      => '*/5',
     }
     # 2nd script to restart when cpu load (sensu check) is excessive
     file { '/usr/sbin/restart_on_sensu_load_check':
-      ensure        => file,
-      owner         => 'root',
-      group         => 'root',
-      mode          => '0755',
-      content       => template('role_treebase/restart_on_sensu_load_check.erb'),
-      require       => Service['tomcat6'],
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restart_on_sensu_load_check.erb'),
+      require     => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
     cron { 'restart_on_sensu_load_check':
-      command => '/usr/sbin/restart_on_sensu_load_check',
-      user    => root,
-      minute  => '*/5',
+      command     => '/usr/sbin/restart_on_sensu_load_check',
+      user        => root,
+      minute      => '*/5',
     }
     # add logrotate to the log file
     file { '/etc/logrotate.d/logrotate_load':
-       content      => template('role_treebase/logrotate_load.erb'),
-       mode         => '0644',
+       content    => template('role_treebase/logrotate_load.erb'),
+       mode       => '0644',
+     }
+  }
+  if ($dev_server == true)
+  {
+    # script to copy database dump
+    file { '/usr/sbin/copy-database':
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/copy-database.erb'),
+      require     => Service['postgres'],
+    }
+    # make cronjob to run every 6 hours
+    cron { 'copy-database':
+      command     => '/usr/sbin/copy-database',
+      user        => ubuntu,
+      hour        => '*/6',
+    }
+    # script to drop tables and import new dump
+    file { '/usr/sbin/restore-database':
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restore-database.erb'),
+      require     => Service['postgres'],
+    }
+    # make cronjob to run every 12 hours
+    cron { 'restore-database':
+      command     => '/usr/sbin/restore-database',
+      user        => postgres,
+      hour        => '*/12',
+    }
+    # add logrotate to the log file
+    file { '/etc/logrotate.d/logrotate_restore':
+       content    => template('role_treebase/logrotate_restore.erb'),
+       mode       => '0644',
      }
   }
 }
