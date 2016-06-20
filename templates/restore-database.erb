@@ -19,7 +19,7 @@ psql -t -d treebasedb -c "SELECT 'DROP TABLE ' || n.nspname || '.' || c.relname 
 psql -d treebasedb -f /var/lib/postgresql/droptables
 echo "$(date) : Dropped all existing tables" >> $log;
 
-zcat /tmp/pgsql.gz | psql treebasedb -1 2> $log
+zcat /tmp/pgsql.gz | psql treebasedb -1 2>> $log
 echo "$(date) : Restore finished" >> $log;
 
 exit
