@@ -4,4 +4,5 @@
 # Copy treebasedb database
 #################################
 
-scp ubuntu@treebase.org:/home/ubuntu/pgsql.gz /tmp/pgsql.gz
+#scp ubuntu@treebase.org:/home/ubuntu/pgsql.gz /tmp/pgsql.gz
+rsync --update ubuntu@treebase.org:/home/ubuntu/pgsql.gz /tmp/pgsql.gz
