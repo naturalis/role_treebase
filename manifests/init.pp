@@ -423,12 +423,11 @@ class role_treebase (
       content     => template('role_treebase/copy-database.erb'),
       require     => Service['postgresql'],
     }
-    # make cronjob to run every 6 hours
+    # make cronjob to run rsync every 6 hours
     cron { 'copy-database':
       command     => '/usr/sbin/copy-database',
       user        => ubuntu,
-      minute      => '0',
-      hour        => '*/6',
+      minute      => '*/10',
     }
     # script to drop tables and import new dump
     file { '/usr/sbin/restore-database':
