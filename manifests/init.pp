@@ -418,7 +418,7 @@ class role_treebase (
     # setup access rule for external ssl access
     postgresql::server::pg_hba_rule { 'allow ssl access to database':
     description        => "Open up postgresql for ssl access",
-    type               => 'host',
+    type               => 'hostssl',
     database           => $postgresql_dbname,
     user               => $postgresql_username,
     address            => $remote_address,
