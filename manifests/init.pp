@@ -78,12 +78,13 @@ class role_treebase (
   $postgresql_username       = "treebase_app",
   $postgresql_password       = undef,
   $postgresql_version        = '9.3',
+  $remote_address            = undef,
   $treebase_owner            = "treebase_owner",
   $treebase_read             = "treebase_read",
   $treebase_url              = "treebase.org",
   $treebase_smtp             = "smtp-relay.gmail.com",
   $treebase_adminmail        = "admin@treebase.org",
-  $java_Xms                  = "1024m",
+  $java_Xms                  = "1024m",
   $java_Xmx                  = "4096m",
   $java_MaxPermSize          = "1024m",
   $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
@@ -149,7 +150,7 @@ class role_treebase (
   $letsencrypt_server        = 'https://acme-staging.api.letsencrypt.org/directory', #https://acme-v01.api.letsencrypt.org/directory
 ) {
   # Install database
-  class { 'postgresql::globals':
+  class { 'postgresql::globals':
     manage_package_repo           => true,
     version                       => "${$postgresql_version}",
   }->
@@ -182,7 +183,7 @@ class role_treebase (
   type               => 'host',
   database           => '${postgresql_dbname}',
   user               => '${postgresql_username}',
-  address            => undef,
+  address            =>  $remote_address,
   auth_method        => 'md5',
   postgresql_version => '${$postgresql_version}',
 }
