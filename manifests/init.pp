@@ -154,7 +154,9 @@ class role_treebase (
     manage_package_repo           => true,
     version                       => "${$postgresql_version}",
   }->
-  class { 'postgresql::server': }
+  class { 'postgresql::server': 
+    listen_addresses              => '*',
+  }
   # add postgresql config from pgtune
   postgresql::server::config_entry {'default_statistics_target': value => '100'}
   postgresql::server::config_entry {'checkpoint_completion_target': value => '0.9'}
