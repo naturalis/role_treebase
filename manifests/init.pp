@@ -177,17 +177,6 @@ class role_treebase (
     createrole    => false,
     login         => true,
   }
-  # setup access rule for external ssl access
-  postgresql::server::pg_hba_rule { 'allow ssl access to database':
-  description        => "Open up postgresql for ssl access",
-  type               => 'host',
-  database           => $postgresql_dbname,
-  user               => $postgresql_username,
-  address            => $remote_address,
-  auth_method        => 'cert',
-  auth_option        => 'clientcert=1',
-  postgresql_version => $postgresql_version,
-}
   # Install tomcat 6
   package { 'tomcat6':
     ensure        => installed,
@@ -426,6 +415,17 @@ class role_treebase (
   }
   if ($dev_server == true)
   {
+    # setup access rule for external ssl access
+    postgresql::server::pg_hba_rule { 'allow ssl access to database':
+    description        => "Open up postgresql for ssl access",
+    type               => 'host',
+    database           => $postgresql_dbname,
+    user               => $postgresql_username,
+    address            => $remote_address,
+    auth_method        => 'cert',
+    auth_option        => 'clientcert=1',
+    postgresql_version => $postgresql_version,
+    }
     # script to copy database dump
     file { '/usr/sbin/copy-database':
       ensure      => file,
