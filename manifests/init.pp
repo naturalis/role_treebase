@@ -150,7 +150,7 @@ class role_treebase (
   $letsencrypt_server        = 'https://acme-staging.api.letsencrypt.org/directory', #https://acme-v01.api.letsencrypt.org/directory
 ) {
   # Install database
-  class { 'postgresql::globals':
+  class { 'postgresql::globals':
     manage_package_repo           => true,
     version                       => "${$postgresql_version}",
   }->
