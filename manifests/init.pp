@@ -84,7 +84,7 @@ class role_treebase (
   $treebase_url              = "treebase.org",
   $treebase_smtp             = "smtp-relay.gmail.com",
   $treebase_adminmail        = "admin@treebase.org",
-  $java_Xms                  = "1024m",
+  $java_Xms                  = "1024m",
   $java_Xmx                  = "4096m",
   $java_MaxPermSize          = "1024m",
   $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
