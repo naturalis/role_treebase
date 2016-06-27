@@ -181,11 +181,12 @@ class role_treebase (
   postgresql::server::pg_hba_rule { 'allow ssl access to database':
   description        => "Open up postgresql for ssl access",
   type               => 'host',
-  database           => '${postgresql_dbname}',
-  user               => '${postgresql_username}',
-  address            =>  $remote_address,
-  auth_method        => 'md5',
-  postgresql_version => '${$postgresql_version}',
+  database           => $postgresql_dbname,
+  user               => $postgresql_username,
+  address            => $remote_address,
+  auth_method        => 'cert',
+  auth_option        => 'clientcert=1',
+  postgresql_version => $postgresql_version,
 }
   # Install tomcat 6
   package { 'tomcat6':
