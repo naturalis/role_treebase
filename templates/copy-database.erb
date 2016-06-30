@@ -5,4 +5,4 @@
 #################################
 
 #scp ubuntu@treebase.org:/home/ubuntu/pgsql.gz /tmp/pgsql.gz
-rsync --update ubuntu@treebase.org:/home/ubuntu/pgsql.gz /var/data/pgsql.gz
+rsync --size-only ubuntu@treebase.org:/home/ubuntu/pgsql.gz /var/data/pgsql.gz
