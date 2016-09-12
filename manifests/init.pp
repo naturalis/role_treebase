@@ -141,7 +141,7 @@ class role_treebase (
   $cron_restart              = true,
   $letsencrypt_path          = '/opt/letsencrypt',
   $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
-  $letsencrypt_version       = 'v0.1.0',
+  $letsencrypt_version       = 'master',
   $letsencrypt_live          = '/etc/letsencrypt/live/treebase.org/cert.pem',
   $letsencrypt_email         = 'aut@naturalis.nl',
   $letsencrypt_domain        = 'treebase.org',

@@ -13,7 +13,7 @@ class role_treebase::letsencrypt (
 ){
   # install letsencrypt repo
   vcsrepo { $path:
-    ensure      => present,
+    ensure      => latest,
     provider    => git,
     source      => $repo,
     revision    => $version,
@@ -49,12 +49,28 @@ class role_treebase::letsencrypt (
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     require     => File["${path}/cli.ini"]
   }
-  # renew cert each month
-  file { '/etc/cron.monthly/renew_cert':
+  # renew cert each week
+  file { '/etc/cron.weekly/renew_cert':
     ensure        => file,
     mode          => '0755',
     owner         => 'root',
     group         => 'root',
     content       => template('role_treebase/renew_cert.erb'),
   }
+
+
+ # create ssl check script for usage with monitoring tools ( sensu )
+  file {'/usr/local/sbin/sslchk.sh':
+    ensure        => 'file',
+    mode          => '0777',
+    content       => template('role_treebase/sslchk.sh.erb')
+  }
+
+ # export check so sensu monitoring can make use of it
+  @sensu::check { 'Check SSL expire date' :
+    command => '/usr/local/sbin/sslchk.sh',
+    tag     => 'central_sensu',
+  }
+
+
 }
