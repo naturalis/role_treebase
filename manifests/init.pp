@@ -78,6 +78,7 @@ class role_treebase (
   $postgresql_username       = "treebase_app",
   $postgresql_password       = undef,
   $postgresql_version        = '9.3',
+  $remote_address            = undef,
   $treebase_owner            = "treebase_owner",
   $treebase_read             = "treebase_read",
   $treebase_url              = "treebase.org",
@@ -139,6 +140,7 @@ class role_treebase (
   $keepalive_timeout         = '1500',
   $timeout                   = '3600',
   $cron_restart              = true,
+  $dev_server                = false,
   $letsencrypt_path          = '/opt/letsencrypt',
   $letsencrypt_repo          = 'git://github.com/letsencrypt/letsencrypt.git',
   $letsencrypt_version       = 'master',
@@ -152,7 +154,9 @@ class role_treebase (
     manage_package_repo           => true,
     version                       => "${$postgresql_version}",
   }->
-  class { 'postgresql::server': }
+  class { 'postgresql::server': 
+    listen_addresses              => '*',
+  }
   # add postgresql config from pgtune
   postgresql::server::config_entry {'default_statistics_target': value => '100'}
   postgresql::server::config_entry {'checkpoint_completion_target': value => '0.9'}
@@ -277,7 +281,7 @@ class role_treebase (
     group         => 'root',
     require       => Class['apache'],
   }
-  # Deploy apache2 default to configure htcacheclean
+   # Deploy apache2 default to configure htcacheclean
   file { '/etc/default/apache2':
     ensure        => file,
     owner         => 'root',
@@ -292,6 +296,7 @@ class role_treebase (
     owner         => 'root',
     group         => 'root',
     mode          => '0644',
+    require       => File[$webdirs],
     content       => template('role_treebase/monitoring-htauth.erb'),
     notify        => Service['apache2'],
   }
@@ -332,7 +337,7 @@ class role_treebase (
     group         => 'tomcat6',
     mode          => '0644',
     require       => Package['tomcat6'],
-  }
+  } # Deploy apache2 default to configure htcacheclean
   # add logrotate to the log file
   file { '/etc/logrotate.d/logrotate_treebase':
      content      => template('role_treebase/logrotate_treebase.erb'),
@@ -376,38 +381,88 @@ class role_treebase (
   {
     # script to restart when http header (sensu check) is not found
     file { '/usr/sbin/restart_on_sensu_http_check':
-      ensure        => file,
-      owner         => 'root',
-      group         => 'root',
-      mode          => '0755',
-      content       => template('role_treebase/restart_on_sensu_http_check.erb'),
-      require       => Service['tomcat6'],
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restart_on_sensu_http_check.erb'),
+      require     => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
     cron { 'restart_on_sensu_http_check':
-      command => '/usr/sbin/restart_on_sensu_http_check',
-      user    => root,
-      minute  => '*/5',
+      command     => '/usr/sbin/restart_on_sensu_http_check',
+      user        => root,
+      minute      => '*/5',
     }
     # 2nd script to restart when cpu load (sensu check) is excessive
     file { '/usr/sbin/restart_on_sensu_load_check':
-      ensure        => file,
-      owner         => 'root',
-      group         => 'root',
-      mode          => '0755',
-      content       => template('role_treebase/restart_on_sensu_load_check.erb'),
-      require       => Service['tomcat6'],
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restart_on_sensu_load_check.erb'),
+      require     => Service['tomcat6'],
     }
     # make cronjob to run every 5 minutes
     cron { 'restart_on_sensu_load_check':
-      command => '/usr/sbin/restart_on_sensu_load_check',
-      user    => root,
-      minute  => '*/5',
+      command     => '/usr/sbin/restart_on_sensu_load_check',
+      user        => root,
+      minute      => '*/5',
     }
     # add logrotate to the log file
     file { '/etc/logrotate.d/logrotate_load':
-       content      => template('role_treebase/logrotate_load.erb'),
-       mode         => '0644',
+       content    => template('role_treebase/logrotate_load.erb'),
+       mode       => '0644',
+     }
+  }
+  if ($dev_server == true)
+  {
+    # setup access rule for external ssl access
+    postgresql::server::pg_hba_rule { 'allow ssl access to database':
+    description        => "Open up postgresql for ssl access",
+    type               => 'hostssl',
+    database           => $postgresql_dbname,
+    user               => $postgresql_username,
+    address            => $remote_address,
+    auth_method        => 'cert',
+    auth_option        => 'clientcert=1',
+    postgresql_version => $postgresql_version,
+    }
+    # script to copy database dump
+    file { '/usr/sbin/copy-database':
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/copy-database.erb'),
+      require     => Service['postgresql'],
+    }
+    # make cronjob to run rsync every 6 hours
+    cron { 'copy-database':
+      command     => '/usr/sbin/copy-database',
+      user        => ubuntu,
+      minute      => '*/10',
+    }
+    # script to drop tables and import new dump
+    file { '/usr/sbin/restore-database':
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restore-database.erb'),
+      require     => Service['postgresql'],
+    }
+    # make cronjob to run every 12 hours
+    cron { 'restore-database':
+      command     => '/usr/sbin/restore-database',
+      user        => postgres,
+      minute      => '0',
+      hour        => '*/12',
+    }
+    # add logrotate to the log file
+    file { '/etc/logrotate.d/logrotate_restore':
+       content    => template('role_treebase/logrotate_restore.erb'),
+       mode       => '0644',
      }
   }
 }

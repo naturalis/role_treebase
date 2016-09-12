@@ -42,22 +42,23 @@ The role::treebase class will bootstrap a Treebase ready environment.
 To install Treebase with Puppet:
 
 * 1. Apply the role::treebase class to a server
-* 2. Manually copy the database dump to the server
-* 3. Change the password of the postgres user
+* 2. Setup the dns entry for the full domain url and change the letsencrypt parameters ($letsencrypt_domain, $letsencrypt_live, $instances).
+* 3. Manually copy the database dump to the server
+* 4. Change the password of the postgres user
 ```shell
    $ sudo -u postgres psql
    $ ALTER USER postgres WITH ENCRYPTED PASSWORD 'changeme';  
    $ \q
 ```
-* 4. Import the postgres database (if there are errors do it another time).
+* 5. Import the postgres database (if there are errors do it another time).
 ```shell
    $ pg_restore -h localhost -U postgres -W <postgress_dump> -d treebasedb -v -c
 ```
-* 5. Restart tomcat6.
+* 6. Restart tomcat6.
 ```shell
    $ sudo service tomcat6 restart
 ```
-* 6. Change the $letsencrypt_server from staging to production if needed:
+* 7. Change the $letsencrypt_server from staging to production if needed:
 ```shell
     Staging: https://acme-staging.api.letsencrypt.org/directory
     Production: https://acme-v01.api.letsencrypt.org/directory
