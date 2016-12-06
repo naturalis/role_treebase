@@ -49,8 +49,9 @@ class role_treebase::letsencrypt (
     path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
     require     => File["${path}/cli.ini"]
   }
+
   # renew cert each week
-  file { '/etc/cron.weekly/renew_cert':
+  file { '/usr/local/sbin/renew_cert':
     ensure        => file,
     mode          => '0755',
     owner         => 'root',
@@ -58,6 +59,12 @@ class role_treebase::letsencrypt (
     content       => template('role_treebase/renew_cert.erb'),
   }
 
+  cron { 'renew cert on sunday':
+    command       => '/usr/local/sbin/renew_cert',
+    user          => 'root',
+    require       => File['/usr/local/sbin/renew_cert'],
+    weekday       => 7,
+  }
 
  # create ssl check script for usage with monitoring tools ( sensu )
   file {'/usr/local/sbin/sslchk.sh':
