@@ -417,16 +417,21 @@ class role_treebase (
   }
   if ($dev_server == true)
   {
+    postgresql::server::database_grant { $postgresql_dbname:
+      privilege => 'ALL',
+      db        => $postgresql_dbname,
+      role      => $postgresql_username,
+    }
     # setup access rule for external ssl access
     postgresql::server::pg_hba_rule { 'allow ssl access to database':
-    description        => "Open up postgresql for ssl access",
-    type               => 'hostssl',
-    database           => $postgresql_dbname,
-    user               => $postgresql_username,
-    address            => $remote_address,
-    auth_method        => 'cert',
-    auth_option        => 'clientcert=1',
-    postgresql_version => $postgresql_version,
+      description        => "Open up postgresql for ssl access",
+      type               => 'hostssl',
+      database           => $postgresql_dbname,
+      user               => $postgresql_username,
+      address            => $remote_address,
+      auth_method        => 'cert',
+      auth_option        => 'clientcert=1',
+      postgresql_version => $postgresql_version,
     }
     # script to copy database dump
     file { '/usr/sbin/copy-database':
