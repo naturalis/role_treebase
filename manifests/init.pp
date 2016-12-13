@@ -165,11 +165,31 @@ class role_treebase (
   postgresql::server::config_entry {'wal_buffers': value => '16MB'}
   postgresql::server::config_entry {'checkpoint_segments': value => '32'}
   postgresql::server::config_entry {'shared_buffers': value => '3840MB'}
-  # Create postgresql database and users
-  postgresql::server::db { "${postgresql_dbname}":
-    user          => "${postgresql_username}",
-    password      => postgresql_password("${postgresql_username}", "${postgresql_password}"),
-    require       => Class['postgresql::server'],
+  if ($dev_server == true)
+  {
+    # Create postgresql database and users
+    postgresql::server::db { "${postgresql_dbname}":
+      user          => "${postgresql_username}",
+      password      => postgresql_password("${postgresql_username}", "${postgresql_password}"),
+      require       => Class['postgresql::server'],
+    }
+    postgresql::server::role{ "${postgresql_username}":
+    superuser     => true, 
+    createdb      => true,
+    }
+    postgresql::server::database_grant { "${postgresql_dbname}":
+      privilege => 'ALL',
+      db        => "$postgresql_dbname",
+      role      => "$postgresql_username",
+    } 
+  } else 
+  {
+    # Create postgresql database and users
+    postgresql::server::db { "${postgresql_dbname}":
+      user          => "${postgresql_username}",
+      password      => postgresql_password("${postgresql_username}", "${postgresql_password}"),
+      require       => Class['postgresql::server'],
+    }
   }
   postgresql::server::role { "${treebase_owner}":
     createrole    => false,
@@ -417,11 +437,6 @@ class role_treebase (
   }
   if ($dev_server == true)
   {
-    postgresql::server::database_grant { $postgresql_dbname:
-      privilege => 'ALL',
-      db        => $postgresql_dbname,
-      role      => $postgresql_username,
-    }
     # setup access rule for external ssl access
     postgresql::server::pg_hba_rule { 'allow ssl access to database':
       description        => "Open up postgresql for ssl access",
