@@ -9,7 +9,14 @@ log='/var/log/tomcat6/sensu_checks_restart.log';
 
 if [ $check != "OK:" ]; then
     sleep 5;
-    echo "$(date) : Restart due to missing http header (sensucheck) | $check |" >> $log;
+    echo "$(date) : Tomcat6 restarted due to missing http header (sensucheck) | $check |" >> $log;
     sleep 5
-    sudo reboot now
+    sudo service tomcat6 restart
+    sleep 20
+    if [ $check != "OK:" ]; then
+            sleep 5
+            echo "$(date) : Reboot due to missing http header (sensucheck) | $check |" >> $log;
+            sleep 5
+            sudo reboot now
+    fi
 fi
