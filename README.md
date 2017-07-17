@@ -140,17 +140,20 @@ class role_treebase (
   - [puppetlabs/apache](https://github.com/puppetlabs/puppetlabs-apache)
   - [puppetlabs/stdlib](https://github.com/puppetlabs/puppetlabs-stdlib)
   - [puppetlabs/vcsrepo](https://github.com/puppetlabs/puppetlabs-vcsrepo)
+  - [voxpupuli/puppet-letsencrypt](https://github.com/voxpupuli/puppet-letsencrypt)
 
 In production we are using more classes for helping us. ;)
   - [naturalis/puppet-role_backup](https://github.com/naturalis/puppet-role_backup) for automated backups (uses [burp](http://burp.grke.org/) as backup mechanism).
   - [naturalis/puppet-role_sensu](https://github.com/naturalis/puppet-role_sensu) for alerting and all kinds of checks.
 
 ## Limitations
-Only supported/tested OS: ubuntu LTS 14.04
+Only supported/tested OS: ubuntu LTS 16.04
+puppet4
 
 ## Development
 Feel free to submit pull requests.
 
 ## Authors
+- Hugo van Duijn <hugo.vanduijn@naturalis.nl>
 - Foppe Pieters <foppe.pieters@naturalis.nl>
 - Pim Polderman <info@pimpolderman.nl>

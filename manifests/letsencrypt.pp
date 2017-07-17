@@ -6,65 +6,20 @@
 #
 #
 class role_treebase::letsencrypt (
-  $path          = $role_treebase::letsencrypt_path,
-  $repo          = $role_treebase::letsencrypt_repo,
-  $version       = $role_treebase::letsencrypt_version,
-  $live          = $role_treebase::letsencrypt_live,
 ){
-  # install letsencrypt repo
-  vcsrepo { $path:
-    ensure      => latest,
-    provider    => git,
-    source      => $repo,
-    revision    => $version,
-    notify      => Exec['initialize letsencrypt'],
-  }
-  #installing letsencrypt
-  exec { 'initialize letsencrypt':
-    command     => "${path}/letsencrypt-auto --agree-tos -h",
-    refreshonly => true,
-  }
-  # install ini file
-  file { "${path}/cli.ini":
-    ensure      => file,
-    mode        => '0644',
-    owner       => 'root',
-    group       => 'root',
-    content     => template('role_treebase/cli.ini.erb'),
-    require     => Exec['initialize letsencrypt'],
-  }
-  # install apache ssl config
-  file { "/etc/letsencrypt/options-ssl-apache.conf":
-    ensure      => file,
-    mode        => '0644',
-    owner       => 'root',
-    group       => 'root',
-    content     => template('role_treebase/options-ssl-apache.conf.erb'),
-    require     => Exec['initialize letsencrypt'],
-  }
-  #installing cert and authenticate on port 443, before apache binds the port
-  exec { 'install letsencrypt':
-    command     => "${path}/letsencrypt-auto certonly --config ${path}/cli.ini",
-    creates     => $live,
-    path        => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
-    require     => File["${path}/cli.ini"]
+
+  class { ::letsencrypt:
+    config => {
+                email  => $role_treebase::letsencrypt_email,
+                server => $role_treebase::letsencrypt_server,
+              }
   }
 
-  # renew cert each week
-  file { '/usr/local/sbin/renew_cert':
-    ensure        => file,
-    mode          => '0755',
-    owner         => 'root',
-    group         => 'root',
-    content       => template('role_treebase/renew_cert.erb'),
+  letsencrypt::certonly { 'letsencrypt_cert':
+    domains       => [$role_treebase::letsencrypt_domain],
+    manage_cron   => true,
   }
 
-  cron { 'renew cert on sunday':
-    command       => '/usr/local/sbin/renew_cert',
-    user          => 'root',
-    require       => File['/usr/local/sbin/renew_cert'],
-    weekday       => 7,
-  }
 
  # create ssl check script for usage with monitoring tools ( sensu )
   file {'/usr/local/sbin/sslchk.sh':

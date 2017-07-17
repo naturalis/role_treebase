@@ -81,7 +81,7 @@ class role_treebase (
   $remote_address            = undef,
   $treebase_owner            = "treebase_owner",
   $treebase_read             = "treebase_read",
-  $treebase_url              = "test.treebase.org",
+  $treebase_url              = "treebase.org",
   $treebase_smtp             = "smtp-relay.gmail.com",
   $treebase_adminmail        = "admin@treebase.org",
   $java_Xms                  = "1024m",
@@ -89,11 +89,12 @@ class role_treebase (
   $java_MaxPermSize          = "1024m",
   $purl_url                  = "http://purl.org/phylo/treebase/phylows/",
   $gitrepos                  =
-  {'tomcat6' =>
+  [ {'tomcat6' =>
       {'reposource'   => 'git@github.com:naturalis/treebase-artifact.git',
        'repokey'      => 'PRIVATE KEY here',
       },
    },
+  ],
   $webdirs                   = ['/var/www/htdocs'],
   $instances                 = {'treebase.org-nonssl' => {
                                  'serveraliases'        => '*.treebase.org',
@@ -119,17 +120,17 @@ class role_treebase (
                                                             Require valid-user
                                                             </Location>
                                                             ProxyTimeout 3604',
-                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://test.treebase.org:8080/treebase-web$1 [P]']},
+                                 'rewrites'             => [{'rewrite_rule' => ['^/treebase-web(.*)$ http://treebase.org:8080/treebase-web$1 [P]']},
                                                             {'rewrite_cond' => ['%{HTTP_USER_AGENT}  ^.*Baiduspider.*$'],
                                                              'rewrite_rule' => ['- [F]'],},],
-                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://test.treebase.org:8080/'},],
+                                 'proxy_pass'           => [{'path'         => '/', 'url' => 'http://treebase.org:8080/'},],
                                  'port'                 => 443,
                                  'serveradmin'          => 'admin@treebase.org',
                                  'priority'             => 10,
                                  'ssl'                  => true,
-                                 'ssl_cert'             => '/etc/letsencrypt/live/test.treebase.org/cert.pem',
-                                 'ssl_key'              => '/etc/letsencrypt/live/test.treebase.org/privkey.pem',
-                                 'ssl_chain'            => '/etc/letsencrypt/live/test.treebase.org/chain.pem',
+                                 'ssl_cert'             => '/etc/letsencrypt/live/treebase.org/cert.pem',
+                                 'ssl_key'              => '/etc/letsencrypt/live/treebase.org/privkey.pem',
+                                 'ssl_chain'            => '/etc/letsencrypt/live/treebase.org/chain.pem',
                                  'additional_includes'  => '/etc/letsencrypt/options-ssl-apache.conf',
                                  },
                                },
@@ -150,7 +151,7 @@ class role_treebase (
   # Install database
   class { 'postgresql::globals':
     manage_package_repo           => true,
-    version                       => "${role_treebase::postgresql_version}",
+    version                       => "${$postgresql_version}",
   }->
   class { 'postgresql::server': 
     listen_addresses              => '*',
@@ -163,55 +164,117 @@ class role_treebase (
   postgresql::server::config_entry {'wal_buffers': value => '16MB'}
   postgresql::server::config_entry {'checkpoint_segments': value => '32'}
   postgresql::server::config_entry {'shared_buffers': value => '3840MB'}
-  if ($role_treebase::dev_server == true)
+  if ($dev_server == true)
   {
     # Create postgresql database and users
-    postgresql::server::db { "${role_treebase::postgresql_dbname}":
-      user          => "${role_treebase::postgresql_username}",
-      password      => postgresql_password("${role_treebase::postgresql_username}", "${role_treebase::postgresql_password}"),
+    postgresql::server::db { "${postgresql_dbname}":
+      user          => "${postgresql_username}",
+      password      => postgresql_password("${postgresql_username}", "${postgresql_password}"),
       require       => Class['postgresql::server'],
     }
-    postgresql::server::role{ "${role_treebase::postgresql_username}":
+    postgresql::server::role{ "${postgresql_username}":
     superuser     => true, 
     createdb      => true,
     }
-    postgresql::server::database_grant { "${role_treebase::postgresql_dbname}":
+    postgresql::server::database_grant { "${postgresql_dbname}":
       privilege => 'ALL',
-      db        => $role_treebase::postgresql_dbname,
-      role      => $role_treebase::postgresql_username,
+      db        => "$postgresql_dbname",
+      role      => "$postgresql_username",
     } 
   } else 
   {
     # Create postgresql database and users
-    postgresql::server::db { "${role_treebase::postgresql_dbname}":
-      user          => "${role_treebase::postgresql_username}",
-      password      => postgresql_password("${role_treebase::postgresql_username}", "${role_treebase::postgresql_password}"),
+    postgresql::server::db { "${postgresql_dbname}":
+      user          => "${postgresql_username}",
+      password      => postgresql_password("${postgresql_username}", "${postgresql_password}"),
       require       => Class['postgresql::server'],
     }
   }
-  postgresql::server::role { "${role_treebase::treebase_owner}":
+  postgresql::server::role { "${treebase_owner}":
     createrole    => false,
     login         => false,
   }
-  postgresql::server::role { "${role_treebase::treebase_read}":
+  postgresql::server::role { "${treebase_read}":
     createrole    => false,
     login         => true,
   }
 
   class { 'tomcat': }
-  class { 'epel': }
-  -> tomcat::instance { 'default':
-    install_from_source => false,
-    package_name        => 'tomcat7',
-  }
-  -> tomcat::service { 'default':
-    use_jsvc     => false,
-    use_init     => true,
-    service_name => 'tomcat7',
+  tomcat::instance { 'treebase':
+    catalina_base => '/opt/apache-tomcat/treebase',
+    source_url    => 'http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.53/bin/apache-tomcat-7.0.53.tar.gz',
   }
 
+  -> tomcat::config::server::context { 'treebase':
+    catalina_base         => '/opt/apache-tomcat/treebase',
+    context_ensure        => present,
+    doc_base              => 'test.war',
+    parent_service        => 'Catalina',
+    parent_engine         => 'Catalina',
+    parent_host           => 'localhost',
+    additional_attributes => {
+      'path' => '/',
+    },
+  }
+  
+  # Install tomcat 6
+#  package { 'tomcat6':
+#    ensure        => installed,
+#  }
+  # make sure that the tomcat 6 services is running
+#  service { 'tomcat6':
+#    ensure        => running,
+#    enable        => true,
+#  }
+  # Deploy context.xml.default with our database settings
+  file { '/var/lib/tomcat6/conf/Catalina/localhost/context.xml.default':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    mode          => '0644',
+    content       => template('role_treebase/context.xml.default.erb'),
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
+  }
+  # Deploy tomcat init script to support headless mesquite
+  file { '/etc/init.d/tomcat6':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0755',
+    content       => template('role_treebase/tomcat6-init.erb'),
+    notify        => Service['tomcat6'],
+  }
+  # Deploy tomcat default to enable authbind
+  file { '/etc/default/tomcat6':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/tomcat6-etc.erb'),
+    notify        => Service['tomcat6'],
+  }
+  # Deploy tomcat server.xml to listen on port 80
+  file { '/var/lib/tomcat6/conf/server.xml':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'tomcat6',
+    mode          => '0644',
+    content       => template('role_treebase/server.xml.erb'),
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
+  }
+  # Deploy redirect index.html
+  file { '/var/lib/tomcat6/webapps/ROOT/index.html':
+    ensure        => file,
+    owner         => 'root',
+    group         => 'root',
+    mode          => '0644',
+    content       => template('role_treebase/index.html.erb'),
+    require       => Package['tomcat6'],
+  }
   #make webdirs for apache
-  file { $role_treebase::webdirs:
+  file { $webdirs:
     ensure        => 'directory',
     mode          => '0750',
     owner         => 'root',
@@ -219,14 +282,14 @@ class role_treebase (
     require       => Class['apache']
   }
   # Install letsencrypt cert
-  Class { 'role_treebase::letsencrypt': }
+  class { 'role_treebase::letsencrypt': }
   # Install apache and enable modules
   class { 'apache':
     default_mods              => true,
     mpm_module                => 'prefork',
-    keepalive                 => $role_treebase::keepalive,
-    max_keepalive_requests    => $role_treebase::max_keepalive_requests,
-    keepalive_timeout         => $role_treebase::keepalive_timeout,
+    keepalive                 => $keepalive,
+    max_keepalive_requests    => $max_keepalive_requests,
+    keepalive_timeout         => $keepalive_timeout,
     require                   => Class['role_treebase::letsencrypt']
   }
   # install apache mods
@@ -238,8 +301,7 @@ class role_treebase (
   class { 'apache::mod::cache': }
   class { 'apache::mod::ssl': }
   # Create Apache Virtual host
-  create_resources('apache::vhost', $role_treebase::instances)
-
+  create_resources('apache::vhost', $instances)
   # mod_cache_disk is not so easy to enable
   apache::mod {'cache_disk':}
   # make config  for mod_cache_disk
@@ -272,72 +334,137 @@ class role_treebase (
     owner         => 'root',
     group         => 'root',
     mode          => '0644',
-    require       => File[$role_treebase::webdirs],
+    require       => File[$webdirs],
     content       => template('role_treebase/monitoring-htauth.erb'),
     notify        => Service['apache2'],
   }
   # General repo settings
   class { 'role_treebase::repogeneral': }
   # Check out the repository
-  create_resources('role_treebase::repo', $role_treebase::gitrepos)
-
-  # Deploy apache2 default to configure htcacheclean
+  create_resources('role_treebase::repo', $gitrepos)
+  # make symlink to treebase-web
+  file { '/var/lib/tomcat6/webapps/treebase-web':
+    ensure        => 'link',
+    target        => '/opt/git/tomcat6/treebase-web',
+    require       => Package['tomcat6'],
+  }
+  # make symlink to mesquite
+  file { '/var/lib/tomcat6/mesquite':
+    ensure        => 'link',
+    target        => '/opt/git/tomcat6/mesquite',
+    require       => Package['tomcat6'],
+  }
+  # make symlink to treebase-web.war
+  file { '/var/lib/tomcat6/webapps/treebase-web.war':
+    ensure        => 'link',
+    target        => '/opt/git/tomcat6/treebase-web.war',
+    require       => Package['tomcat6'],
+  }
+  # make symlink to treebase.log
+  file { '/var/lib/tomcat6/treebase.log':
+    ensure        => 'link',
+    target        => '/var/log/tomcat6/treebase.log',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    require       => Package['tomcat6'],
+  }->
+  # Deploy treebase.log
+  file { '/var/log/tomcat6/treebase.log':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    mode          => '0644',
+    require       => Package['tomcat6'],
+  } # Deploy apache2 default to configure htcacheclean
   # add logrotate to the log file
   file { '/etc/logrotate.d/logrotate_treebase':
      content      => template('role_treebase/logrotate_treebase.erb'),
      mode         => '0644',
    }
-
-  if ($role_treebase::cron_restart == true)
+   # make lib dir
+  file { '/var/lib/tomcat6/lib':
+    ensure        => 'directory',
+    mode          => '0755',
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    require       => Package['tomcat6'],
+  }
+  # deploy log4j in the lib dir
+  file {'/var/lib/tomcat6/lib/log4j-1.2.16.jar':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'root',
+    mode          => '0644',
+    source        => "puppet:///modules/role_treebase/log4j-1.2.16.jar",
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
+  }
+  # deploy log4j properties
+  file {'/var/lib/tomcat6/conf/log4j.properties':
+    ensure        => file,
+    owner         => 'tomcat6',
+    group         => 'tomcat6',
+    mode          => '0644',
+    source        => "puppet:///modules/role_treebase/log4j.properties",
+    require       => Package['tomcat6'],
+    notify        => Service['tomcat6'],
+  }
+  # remove old logging properties
+  file {'/var/lib/tomcat6/conf/logging.properties':
+    ensure        => absent,
+    require       => [Package['tomcat6'],File['/var/lib/tomcat6/conf/log4j.properties']],
+    notify        => Service['tomcat6'],
+  }
+  if ($cron_restart == true)
   {
     # script to restart when http header (sensu check) is not found
-#    file { '/usr/sbin/restart_on_sensu_http_check':
-#      ensure      => file,
-#      owner       => 'root',
-#      group       => 'root',
-#      mode        => '0755',
-#      content     => template('role_treebase/restart_on_sensu_http_check.erb'),
-#      require     => Service['tomcat6'],
-#    }
+    file { '/usr/sbin/restart_on_sensu_http_check':
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restart_on_sensu_http_check.erb'),
+      require     => Service['tomcat6'],
+    }
     # make cronjob to run every 5 minutes
-#    cron { 'restart_on_sensu_http_check':
-#      command     => '/usr/sbin/restart_on_sensu_http_check',
-#      user        => root,
-#      minute      => '*/5',
-#    }
+    cron { 'restart_on_sensu_http_check':
+      command     => '/usr/sbin/restart_on_sensu_http_check',
+      user        => root,
+      minute      => '*/5',
+    }
     # 2nd script to restart when cpu load (sensu check) is excessive
-#    file { '/usr/sbin/restart_on_sensu_load_check':
-#      ensure      => file,
-#      owner       => 'root',
-#      group       => 'root',
-#      mode        => '0755',
-#      content     => template('role_treebase/restart_on_sensu_load_check.erb'),
-#      require     => Service['tomcat6'],
-#    }
+    file { '/usr/sbin/restart_on_sensu_load_check':
+      ensure      => file,
+      owner       => 'root',
+      group       => 'root',
+      mode        => '0755',
+      content     => template('role_treebase/restart_on_sensu_load_check.erb'),
+      require     => Service['tomcat6'],
+    }
     # make cronjob to run every 5 minutes
-#    cron { 'restart_on_sensu_load_check':
-#      command     => '/usr/sbin/restart_on_sensu_load_check',
-#      user        => root,
-#      minute      => '*/5',
-#    }
+    cron { 'restart_on_sensu_load_check':
+      command     => '/usr/sbin/restart_on_sensu_load_check',
+      user        => root,
+      minute      => '*/5',
+    }
     # add logrotate to the log file
     file { '/etc/logrotate.d/logrotate_load':
        content    => template('role_treebase/logrotate_load.erb'),
        mode       => '0644',
      }
   }
-  if ($role_treebase::dev_server == true)
+  if ($dev_server == true)
   {
     # setup access rule for external ssl access
     postgresql::server::pg_hba_rule { 'allow ssl access to database':
       description        => "Open up postgresql for ssl access",
       type               => 'hostssl',
-      database           => $role_treebase::postgresql_dbname,
-      user               => $role_treebase::postgresql_username,
-      address            => $role_treebase::remote_address,
+      database           => $postgresql_dbname,
+      user               => $postgresql_username,
+      address            => $remote_address,
       auth_method        => 'cert',
       auth_option        => 'clientcert=1',
-      postgresql_version => $role_treebase::postgresql_version,
+      postgresql_version => $postgresql_version,
     }
     # script to copy database dump
     file { '/usr/sbin/copy-database':
