@@ -14,11 +14,13 @@
 
 ## Overview
 
-This puppet module deploys the Treebase java application (excluding the databse) and creates the necessary configuration to run the application. You can see the application running at: [treebase.org](https://treebase.org)
+This puppet module deploys the TreeBASE compiled java [artifacts](https://github.com/naturalis/treebase-artifact) (excluding 
+the database) and creates the necessary configuration to run the application. You can see the application running at: 
+[treebase.org](https://treebase.org)
 
 ## Module Description
 
-The role::treebase class will bootstrap a Treebase ready environment.
+The role::treebase class will bootstrap a TreeBASE web application environment.
 
 ## Setup
 
@@ -28,7 +30,7 @@ The role::treebase class will bootstrap a Treebase ready environment.
 	- tomcat6  (WARNING: End of Life Q4 2016) :-(
 	- postgresql
 	- apache2
-* Directory's:  
+* Directories:  
 	- '/var/lib/tomcat6' will be overwritten with Treebase specific settings.
 	- '/opt/letsencrypt' and '/etc/letsencrypt' will be created for ssl certificates.
 * Database: postgresql database with 3 users (owner, read and app)
